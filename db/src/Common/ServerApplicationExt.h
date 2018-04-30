@@ -27,5 +27,5 @@ public:
     }
 };
 
-// 类名 + 声明的主函数名称
+// 类名 + 声明的主函数名称,实际调用AppMainFuncImpl模板的main函数
 #define APP_SERVER_MAIN_FUNC(AppServerClassName, main_func) int main_func(int _argc, char * _argv[]) { return AppMainFuncImpl<AppServerClassName, ServerAppHandler>::main(_argc, _argv); }

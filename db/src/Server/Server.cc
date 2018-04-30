@@ -3,6 +3,8 @@
 
 int DataBase::Server::main(const std::vector< std::string >& args)
 {
+	//等待外部终止应用
+	waitForTerminationRequest();
     return  Poco::Util::Application::EXIT_OK;
 }
 
