@@ -2,5 +2,4 @@
 include_directories(src)
 include_directories(${PROJECT_ROOT_PATH}/util)
 
-
 add_subdirectory(src)

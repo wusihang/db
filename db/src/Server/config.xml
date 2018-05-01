@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<db>
+    <logger>
+        <level>trace</level>
+        <log>/home/wusihang/db/log/db-server/db-server.log</log>
+        <errorlog>/home/wusihang/db/log/db-server/db-server.err.log</errorlog>
+        <size>1000M</size>
+        <count>10</count>
+    </logger>
+    <http_port>8123</http_port>
+</db>
