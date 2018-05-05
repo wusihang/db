@@ -56,7 +56,7 @@ void BaseDaemon::defineOptions(Poco::Util::OptionSet& _options) {
 void BaseDaemon::initialize(Poco::Util::Application& app) {
     Poco::Util::ServerApplication::initialize(app);
     //是否是后台启动
-    bool is_daemon = config().getBool("application.runAsDaemon", false);
+    is_daemon = config().getBool("application.runAsDaemon", true);
     if (is_daemon) {
         std::string path = Poco::Path(config().getString("application.path")).setFileName("").toString();
         //改变当前工作目录
@@ -90,6 +90,7 @@ void BaseDaemon::initialize(Poco::Util::Application& app) {
         generateCorePath(log_path);
     }
 
+    //打印版本号
     logVersion();
 }
 
@@ -109,7 +110,7 @@ void BaseDaemon::reloadConfiguration()
     config().add(last_configuration, PRIO_DEFAULT, false);
     std::string log_command_line_option = config().getString("logger.log", "");
     // 如果不是以后台运行，并且logger.log未指定日志文件，那么就打印到控制台
-    log_to_console = !(config().getBool("application.runAsDaemon", false)) && log_command_line_option.empty();
+    log_to_console = !is_daemon && log_command_line_option.empty();
 }
 
 void BaseDaemon::resetCoreDumpSize() const
@@ -190,7 +191,7 @@ void BaseDaemon::buildLoggers()
         //创建logger日志文件
         std::string path = FileUtil::createDirectoryRecusively(config().getString("logger.log"));
         // 如果是以后台模式启动，那么尝试进入刚创建的目录
-        if (config().getBool("application.runAsDaemon", false) && chdir(path.c_str()) != 0) {
+        if (is_daemon && chdir(path.c_str()) != 0) {
             throw Poco::Exception("Cannot change directory to " + path);
         }
         std::string loggerPath = config().getString("logger.log");
@@ -199,7 +200,7 @@ void BaseDaemon::buildLoggers()
         Poco::AutoPtr<Poco::SplitterChannel> split = new Poco::SplitterChannel;
         Poco::AutoPtr<DataBase::OwnPatternFormatter> pf = new DataBase::OwnPatternFormatter(this);
         pf.get()->setProperty("times","local");
-        Poco::AutoPtr<Poco::FormattingChannel> log = new Poco::FormattingChannel();
+        Poco::AutoPtr<Poco::FormattingChannel> log = new Poco::FormattingChannel(pf);
         log_file  = new Poco::FileChannel;
         log_file->setProperty("path", Poco::Path(loggerPath).absolute().toString());
         log_file->setProperty("rotation", config().getRawString("logger.size", "100M"));
@@ -248,7 +249,7 @@ void BaseDaemon::buildLoggers()
         logger().setChannel(split);
     }
     else {
-        if (config().getBool("application.runAsDaemon", false) && chdir("/tmp") != 0) {
+        if (is_daemon && chdir("/tmp") != 0) {
             throw Poco::Exception("Cannot change directory to /tmp");
         }
         Poco::AutoPtr<Poco::ConsoleChannel> file = new Poco::ConsoleChannel;

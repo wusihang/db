@@ -1,6 +1,8 @@
 #include<CommonUtil/FileUtil.h>
 #include<Poco/File.h>
 #include<Poco/Path.h>
+#include<Poco/String.h>
+#include<Poco/Exception.h>
 #include<CommonUtil/LoggerUtil.h>
 #include<Poco/Logger.h>
 #include<sys/stat.h>
@@ -31,3 +33,17 @@ std::string FileUtil::createDirectoryRecusively(const std::string & _path) {
 
     return str;
 }
+
+std::string FileUtil::getCanonicalPath(std::string&& path)
+{
+    Poco::trimInPlace(path);
+    if (path.empty()) {
+        throw Poco::Exception("path configuration parameter is empty");
+    }
+    if (path.back() != '/') {
+        path += '/';
+    }
+    return path;
+
+}
+

@@ -2,10 +2,18 @@
 <db>
     <logger>
         <level>trace</level>
-        <log>/home/wusihang/db/log/db-server/db-server.log</log>
+<!--         <log>/home/wusihang/db/log/db-server/db-server.log</log> -->
         <errorlog>/home/wusihang/db/log/db-server/db-server.err.log</errorlog>
         <size>1000M</size>
         <count>10</count>
     </logger>
     <http_port>8123</http_port>
+	
+	<pid>/home/wusihang/db/pid/pid.pid</pid>
+	
+	<path>/home/wusihang/db/path/</path>
+	
+	<interserver_http_port> 19009</interserver_http_port>
+<!-- 	<interserver_http_host></interserver_http_host> -->
+	<http_port>8123</http_port>
 </db>
