@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <meta name="generator" content="Madoko, version 1.1.6" />
+  <meta name="viewport" content="initial-scale=1.0" />
+  <meta name="author" content="" />
+  <meta name="description" content="Provides popup anchor links to headings in a web page.
+     This makes it easier for others to link to specific sections
+     in a large web manual or book." />
+  <title>2、构建日志系统&amp;HTTP服务器</title>
+  <style type="text/css"  class="link">
+  /*# sourceURL=madoko.css */
+  
+  .madoko .toc>.tocblock .tocblock .tocblock {
+    margin-left: 2.25em;
+  }
+  .madoko .toc>.tocblock .tocblock {
+    margin-left: 1.5em;
+  }
+  .madoko .toc-contents>.tocblock>.tocitem {
+    font-weight: bold;
+  }
+  .madoko .toc {
+    margin-top: 1em;
+  }
+  .madoko p.para-continue {
+    margin-bottom: 0pt;
+  }
+  .madoko .para-block+p {
+    margin-top: 0pt;
+  }
+  .madoko ul.para-block, .madoko ol.para-block {
+    margin-top: 0pt;
+    margin-bottom: 0pt;
+  }
+  .madoko ul.para-end, .madoko ol.para-end {
+    margin-bottom: 1em;
+  }
+  .madoko dl {
+    margin-left: 0em;
+  }
+  .madoko blockquote {
+    font-style: italic;
+  }
+  .madoko a.localref {
+    text-decoration: none;
+  }
+  .madoko a.localref:hover {
+    text-decoration: underline;
+  }
+  .madoko .footnotes {
+    font-size: smaller;
+    margin-top: 2em;
+  }
+  .madoko .footnotes hr {
+    width: 50%;
+    text-align: left;
+  }
+  .madoko .footnote { 
+    margin-left: 1em;
+  }
+  .madoko .footnote-before {
+    margin-left: -1em;
+    width: 1em;
+    display: inline-block;
+  }
+  .madoko .align-center, .madoko .align-center>p {
+    text-align: center !important;
+  }
+  .madoko .align-center pre {
+    text-align: left;
+  }
+  .madoko .align-center>* {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .madoko .align-left, .madoko .align-left>p {
+    text-align: left !important;
+  }
+  .madoko .align-left>* {
+    margin-left: 0pt !important;
+    margin-right: auto !important;
+  }
+  .madoko .align-right, .madoko .align-right>p {
+    text-align: right !important;
+  }
+  .madoko .align-right>* {
+    margin-left: auto !important;
+    margin-right: 0pt !important;
+  }
+  .madoko .align-center>table,
+  .madoko .align-left>table,
+  .madoko .align-right>table {
+    text-align: left !important;
+  }
+  .madoko .equation-before {
+    float: right;
+  }
+  .madoko .bibitem {
+    font-size: smaller;
+  }
+  .madoko .bibsearch {
+    font-size: x-small;
+    text-decoration:none;
+    color: black;
+    font-family: "Segoe UI Symbol", Symbola, serif;
+  }
+  .madoko .block, .madoko .figure, .madoko .bibitem, .madoko .equation, .madoko div.math {
+    margin-top: 1ex;
+    margin-bottom: 1ex;
+  }
+  .madoko .figure {
+    padding: 0.5em;
+    margin-left: 0pt;
+    margin-right: 0pt;
+  }
+  .madoko .hidden {
+    display: none;
+  }
+  .madoko .invisible {
+    visibility: hidden;
+  }
+  .madoko.preview .invisible {
+    visibility: visible;
+    opacity: 0.5;
+  }
+  .madoko code.code, .madoko span.code {
+    white-space: pre-wrap;
+  }
+  .madoko hr, hr.madoko {
+    border: none;
+    border-bottom: black solid 1px;
+    margin-bottom: 0.5ex;
+  }
+  .madoko .framed>*:first-child {
+    margin-top: 0pt;
+  }
+  .madoko .framed>*:last-child {
+    margin-bottom: 0pt;
+  }
+  .madoko ul.list-style-type-dash {
+      list-style-type: none !important;
+  }
+  .madoko ul.list-style-type-dash > li:before {
+      content: "\2013"; 
+      position: absolute;
+      margin-left: -1em; 
+  }
+  .madoko table.madoko {
+    border-collapse: collapse;
+  }
+  .madoko td, .madoko th {
+    padding: 0ex 0.5ex;
+    margin: 0pt;
+    vertical-align: top;
+  }
+  .madoko .cell-border-left {
+    border-left: 1px solid black;
+  }
+  .madoko .cell-border-right {
+    border-right: 1px solid black;
+  }
+  .madoko thead>tr:first-child>.cell-line,
+  .madoko tbody:first-child>tr:first-child>.cell-line {
+    border-top: 1px solid black;
+    border-bottom: none;
+  }
+  .madoko .cell-line, .madoko .cell-double-line {
+    border-bottom: 1px solid black;
+    border-top: none;
+  }
+  .madoko .cell-double-line {
+    border-top: 1px solid black;
+    padding-top: 1.5px !important;
+  }
+  .madoko .input-mathpre .MathJax_Display {
+    text-align: left !important;
+  }
+  .madoko div.input-mathpre {
+    text-align: left;
+    margin-top: 1.5ex;
+    margin-bottom: 1ex;
+  }
+  .madoko .math-rendering {
+    text-align: left;
+    white-space: pre;
+    color: gray;
+  }
+  .madoko .mathdisplay {
+    text-align: center;
+  }
+  .madoko .pretty table {
+    border-collapse: collapse;
+  }
+  .madoko .pretty td {
+    padding: 0em;
+  }
+  .madoko .pretty td.empty {
+    min-width: 1.5ex;
+  }
+  .madoko .pretty td.expander {
+    width: 100em;
+  }
+  body.madoko, .madoko .serif {
+    font-family: Cambria,"Times New Roman","Liberation Serif","Times",serif;
+  }
+  .madoko .sans-serif {
+    font-family: "Calibri", "Optima", sans-serif;
+  }
+  .madoko .symbol {
+    font-family: "Segoe UI Symbol", Symbola, serif;
+  }
+  body.madoko {  
+    -webkit-text-size-adjust: 100%;       
+    text-rendering: optimizeLegibility;
+  }
+  body.madoko {
+    max-width: 88ex; 
+    margin: 1em auto;
+    padding: 0em 2em;  
+  }
+  body.preview.madoko {
+    padding: 0em 1em;
+  }
+  .madoko p {
+    text-align: justify;
+  }
+  .madoko h1, .madoko h2, .madoko h3, .madoko h4 { 
+    margin-top: 1.22em; 
+    margin-bottom: 1ex;
+  }
+  .madoko h1+p, .madoko h2+p, .madoko h3+p, .madoko h4+p, .madoko h5+p  { 
+    margin-top: 1ex;    
+  }
+  .madoko h5, .madoko h6 { 
+    margin-top: 1ex;
+    font-size: 1em;
+  }
+  .madoko h5 { 
+    margin-bottom: 0.5ex;
+  }
+  .madoko h5 + p {
+    margin-top: 0.5ex;
+  }
+  .madoko h6 { 
+    margin-bottom: 0pt;
+  }
+  .madoko h6 + p {
+    margin-top: 0pt;
+  }
+  .madoko pre, .madoko code, .madoko kbd, .madoko samp, .madoko tt, 
+  .madoko .monospace, .madoko .token-indent, .madoko .reveal pre, .madoko .reveal code, .madoko .email {
+    font-family: Consolas,"Andale Mono WT","Andale Mono",Lucida Console,Monaco,monospace,monospace;
+    font-size: 0.85em;
+  }
+  .madoko pre code, .madoko .token-indent {
+    font-size: 0.95em;
+  }
+  .madoko pre code {
+    font-family: inherit !important;
+  }
+  .madoko ol.linenums li {
+    background-color: white;
+    list-style-type: decimal;
+  }
+  .madoko .remote {
+    background-color: #F0FFF0;
+  }
+  .madoko .remote + * {
+    margin-top: 0pt;
+  }
+  @media print {
+    body.madoko {
+      font-size: 10pt;
+    }
+    @page {
+      margin: 1in 1.5in;
+    }
+  }
+  @media only screen and (max-device-width:1024px) {
+    body.madoko {
+      padding: 0em 0.5em;    
+    }
+    .madoko li {
+      text-align: left;
+    }
+  }
+  
+    </style>
+  
+  <style>
+    /* ---------------------------------------------
+          Center document in the viewport
+        ----------------------------------------------*/
+        body.madoko {
+          margin: 0pt;
+          padding: 0pt;
+          max-width: 100%;
+        }
+        .body {
+          width: 70em;
+          max-width: 90%;
+          margin: 1em auto;
+        }
+        .preview .body {
+          width: 98%;
+          max-width: 100%;
+          margin: 0.25em auto;
+        }
+        
+        /* -----------------------------------------
+           Settings for a wide viewport:
+           The contents are shown in the side panel
+           on the left side.
+        -------------------------------------------- */
+        @media (min-width: 1024px) {
+          body.madoko {
+            padding-right: 8%; /* looks more balanced with sidepanel */
+          }       
+          .sidepanel {
+            width   : 14rem ; 
+            position: fixed;
+            top     : 3rem ;
+            max-height: 90%;
+            overflow-y: auto;
+          }
+          .mainpanel, .footnotes, .titleblock {
+            margin-left: calc(14rem + 4rem + 2px + 1rem);
+          }
+          .tocblock2, .tocblock3 {
+            display:none;
+          }
+          .tocblock.auto-expands, .tocblock.click-expands {
+            display:block;
+          }     
+          /*
+          .tocitem.current::after {
+            content: "\00A0\25CF";
+          }
+          */
+          .tocitem.current .heading-label {
+            font-weight: bold;
+          }      
+          span.unexpanded, span.expanded {
+            display: inline-block;
+            width: 1.25em;
+            margin-left: -1.25em;
+            font-family: "Segoe UI Symbol", Symbola, serif;
+            font-size: 70%;
+            cursor: pointer;
+            vertical-align: 0.1em;
+          }
+          span.unexpanded::before {
+            content: "\25B6";
+          }
+          span.expanded::before {
+            content: "\25BC";
+          }
+        }
+        
+        /* ---------------------------------------------------
+           Set margins and padding for side panel and sections
+        ------------------------------------------------------ */
+        .sidepanel, .mainpanel section, .footnotes {
+          padding: 0pt 1rem 0.25rem 1rem;
+        }
+        .sidepanel .tocblock {
+          font-size  : small;
+          white-space: nowrap;
+        }
+        .sidepanel .toc, .sidepanel h2, .sidepanel h1 {
+          margin-top: 0pt;
+        }
+        .footnotes {
+          padding-top: 0.5em; 
+        }
+        .footnotes>hr {
+          display:none;
+        }
+        section,.sidepanel {
+          margin-bottom: 1em;
+        }
+        
+        /* -----------------------------------
+           Nice scrollbar for toc
+        ----------------------------------- */
+        .sidepanel::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }     
+        /* Track */
+        .sidepanel::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 4px rgba(0,0,0,0.3); 
+            -webkit-border-radius: 6px;
+            border-radius: 6px;
+        }    
+        /* Handle */
+        .sidepanel::-webkit-scrollbar-thumb {
+            -webkit-border-radius: 6px;
+            border-radius: 6px;
+            background: lightgray; 
+            -webkit-box-shadow: inset 0 0 4px rgba(0,0,0,0.5); 
+        }
+        .sidepanel::-webkit-scrollbar-thumb:window-inactive {
+          background: gainsboro; 
+        }
+        .madoko .toc > .tocblock .tocblock .tocblock {
+          margin-left: 1.5em;
+        }
+        .madoko .toc a {
+          color: #444; 
+        }
+    h0:hover .entity-anchor,
+        h1:hover .entity-anchor,
+        h2:hover .entity-anchor,
+        h3:hover .entity-anchor {
+          display: inline-block;
+        }
+        
+        a.entity-anchor {
+          color: black;
+        }
+        
+        a.localref.entity-anchor:hover {
+          text-decoration: none;
+        }
+        
+        .entity-anchor {
+          display: none;
+          width: 0.8em;
+          margin-left: -0.8em;
+          font-family: "Segoe UI Symbol", Symbola, serif;
+          font-size: 80%;
+        }
+  </style>
+  </head>
+<body class="madoko">
+
+<div class="body madoko" style="line-adjust:0">
+
+<div class="titleblock align-center para-block" style="text-align:center;line-adjust:0">
+<div class="titleheader align-center" style="text-align:center;line-adjust:0">
+<div class="title para-block" style="font-size:xx-large;font-weight:bold;margin-bottom:0.5ex;line-adjust:0">2、构建日志系统&amp;HTTP服务器</div></div>
+<div class="authors align-center" style="text-align:center;width:80%;line-adjust:0"><table class="authorrow columns block" style="margin-top:2ex;width:100%;line-adjust:0">
+<tbody><tr><td class="author column" style="text-align:center;line-adjust:0">
+<div class="authoremail email" style="line-adjust:0">wusihang9@139.com</div></td></tr></tbody></table></div></div>
+<div class="sidepanel"><span data-line=""></span>
+<nav class="toc toc-contents">
+<div class="tocblock tocblock1">
+<div class="tocitem tocitem1" data-toc-target-elem="h1" data-toc-target="sec-intro" data-toc-depth="1" data-toc-line="[1]{.heading-label}.&#8194;\u5E94\u7528\u521D\u59CB\u5316" style="toctarget:sec-intro"><a href="#sec-intro" class="localref"><span class="heading-label">1</span>.&#8194;应用初始化</a></div>
+<div class="tocblock tocblock2">
+<div class="tocitem tocitem2" data-toc-target-elem="h2" data-toc-target="sec-basedaemoncc" data-toc-depth="2" data-toc-line="[1.1]{.heading-label}.&#8194;\u81EA\u5B9A\u4E49\u5E94\u7528\u542F\u52A8\u53C2\u6570(BaseDaemon.cc)" style="toctarget:sec-basedaemoncc"><a href="#sec-basedaemoncc" class="localref"><span class="heading-label">1.1</span>.&#8194;自定义应用启动参数(BaseDaemon.cc)</a></div>
+<div class="tocitem tocitem2" data-toc-target-elem="h2" data-toc-target="sec-basedaemoncc" data-toc-depth="2" data-toc-line="[1.2]{.heading-label}.&#8194;\u5E94\u7528\u521D\u59CB\u5316(BaseDaemon.cc)" style="toctarget:sec-basedaemoncc"><a href="#sec-basedaemoncc" class="localref"><span class="heading-label">1.2</span>.&#8194;应用初始化(BaseDaemon.cc)</a></div></div>
+<div class="tocitem tocitem1" data-toc-target-elem="h1" data-toc-target="sec-mainservercc" data-toc-depth="1" data-toc-line="[2]{.heading-label}.&#8194;\u5E94\u7528\u6846\u67B6main\u51FD\u6570\uFF08Server.cc\uFF09" style="toctarget:sec-mainservercc"><a href="#sec-mainservercc" class="localref"><span class="heading-label">2</span>.&#8194;应用框架main函数（Server.cc）</a></div>
+<div class="tocitem tocitem1" data-toc-target-elem="h1" data-toc-target="section" data-toc-depth="1" data-toc-line="[3]{.heading-label}.&#8194;\u5176\u4ED6\u8BF4\u660E" style="toctarget:section"><a href="#section" class="localref"><span class="heading-label">3</span>.&#8194;其他说明</a></div></div></nav></div>
+<div class="mainpanel">
+<h2 id="sec-intro" class="h1" data-heading-depth="1" style="display:block"><a href="#sec-intro" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">1</span>.&#8194;</span>应用初始化</h2>
+<p class="p noindent">Poco的ServerApplication框架下，首先处理应用启动参数，然后进行应用初始化，接着进入main
+，一般情况下会在main函数中调用waitForTerminalRequest来等待终止信号
+</p><h3 id="sec-basedaemoncc" class="h2" data-heading-depth="2" style="display:block"><a href="#sec-basedaemoncc" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">1.1</span>.&#8194;</span>自定义应用启动参数(BaseDaemon.cc)</h3>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>virtual函数defineOptions用于处理自定义应用启动参数</code></pre>
+<div class="framed" style="border:solid black 1px">
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>void BaseDaemon::defineOptions(Poco::Util::OptionSet&amp; _options) {
+    //调用默认选项定义
+    Poco::Util::ServerApplication::defineOptions(_options);
+    //定义配置文件选项
+    _options.addOption(
+        Poco::Util::Option(&quot;config-file&quot;, &quot;C&quot;,
+         &quot;load configuration from a given file&quot;).required(false).repeatable(
+            false).argument(&quot;&lt;file&gt;&quot;).binding(&quot;config-file&quot;));
+ ......
+ }</code></pre></div>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>上诉代码中，addOption的说明：config-file是参数名全称，C是简称，之后是简要说明。
+.require是否必须，.repeatable是否可以重复写多个config-file，
+.argument,指定对应参数可以附带的内容
+.binding表示将参数绑定到配置框架之中，之后就可以直接用config().get来获取
+</code></pre><h3 id="sec-basedaemoncc" class="h2" data-heading-depth="2" style="display:block"><a href="#sec-basedaemoncc" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">1.2</span>.&#8194;</span>应用初始化(BaseDaemon.cc)</h3>
+<p class="p noindent">virtual initialize用于应用程序初始化，可以完成：<br>
+1、配置加载<br>
+2、日志框架构建<br>
+3、异常处理框架构建<br>
+4、信号处理函数注册<br>
+等一系列初始化动作
+</p>
+<div class="framed" style="border:solid black 1px">
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>void BaseDaemon::initialize(Poco::Util::Application&amp; app) {
+    Poco::Util::ServerApplication::initialize(app);
+    ......
+    //重新加载配置（从配置文件config.xml中读取）
+    reloadConfiguration();
+    ......
+
+    //构建日志基本框架
+    buildLoggers();
+    ......
+    //打印版本号
+    logVersion();
+}</code></pre></div>
+<p class="p noindent">以上省略一大部分能力，其中最重要的两个就是配置加载和日志框架构建<br>
+目前还未实现信号处理和异常处理，目前可以暂时不用关心<br>
+reloadConfiguration完成事情是，从启动参数config-file中获取xml配置文件<br>
+然后加载该配置文件，将配置加入到配置框架当中（config().add&#8230;）。
+</p>
+<p class="p indent">buildLoggers完成的事情是，根据配置决定是否直接输出到文件或控制台，<br>
+构建自己的日志打印格式,定义不同的日志打印级别，日志归档规则定义等。
+</p>
+<p class="p indent">logVersion就是在日志基本框架完成后，打印一条版本日志
+</p><h2 id="sec-mainservercc" class="h1" data-heading-depth="1" style="display:block"><a href="#sec-mainservercc" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">2</span>.&#8194;</span>应用框架main函数（Server.cc）</h2>
+<p class="p noindent">在以上选项参数和初始化完成后，进入main函数（是主流程的意思,也就是基本工作都在此处完成
+，不是传统意义上的入口点main，入口点main在main.cc中就已经声明了）
+</p>
+<div class="framed" style="border:solid black 1px">
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>int DataBase::Server::main(const std::vector&lt; std::string &gt;&amp; args)
+{
+    Poco::Logger* log = &amp;logger();
+    ...
+
+    //加大文件句柄打开数量
+    {
+       ...
+    }
+
+    //创建临时文件目录
+    {
+       ...
+    }
+
+    ...
+
+    //退出主函数时析构，即退出时调用
+    SCOPE_EXIT( {
+        LOG_INFO(log, &quot;Shutting down storages.&quot;);
+        LOG_DEBUG(log, &quot;Shutted down storages.&quot;);
+        global_context.reset();
+        LOG_DEBUG(log, &quot;Destroyed global context.&quot;);
+    });
+
+    {
+       ...
+        //构建socket监听地址函数
+        auto make_socket_address = [&amp;](const std::string &amp; host, std::uint16_t port) {
+            Poco::Net::SocketAddress socket_address;
+            try
+            {
+                socket_address = Poco::Net::SocketAddress(host, port);
+            }
+            catch (const Poco::Net::DNSException &amp; e)
+            {
+                       ...
+            }
+            return socket_address;
+        };
+
+        for (const auto &amp; listen_host : listen_hosts) {
+            try {
+                /// HTTP
+                if (config().has(&quot;http_port&quot;)) {
+                    Poco::Net::SocketAddress http_socket_address
+                     = make_socket_address(listen_host,
+                            config().getInt(&quot;http_port&quot;));
+                    Poco::Net::ServerSocket http_socket(http_socket_address);
+                    http_socket.setReceiveTimeout(60000);
+                    http_socket.setSendTimeout(60000);
+
+                    servers.emplace_back(
+                        new Poco::Net::HTTPServer(
+                        new DataBase::HTTPHandlerFactory(*this, 
+                        &quot;HTTPHandler-factory&quot;), 
+                        server_pool,
+                        http_socket, 
+                        http_params));
+
+                    LOG_INFO(log, &quot;Listening http://&quot; +
+                     http_socket_address.toString());
+                }
+                //至少需要有一个TCP服务器或HTTP服务器
+                if (servers.empty()) {
+                    throw Poco::Exception(
+                &quot;No &#39;tcp_port&#39; and &#39;http_port&#39; is specified in configuration file.&quot;);
+                }
+            } catch (const Poco::Net::NetException &amp; e) {
+                if (try_listen &amp;&amp; e.code() == POCO_EPROTONOSUPPORT)
+                    LOG_ERROR(log,
+                              &quot;Listen [&quot; &lt;&lt; listen_host &lt;&lt; &quot;]: &quot;
+                               &lt;&lt; e.what() &lt;&lt; &quot;: &quot; &lt;&lt; e.message()
+                       &lt;&lt; &quot;  If it is an IPv6 or IPv4 address and yo
+                       ur host has disabled IPv6 or IPv4, then consid
+                       er to &quot; &quot;specify not disabled IPv4 or IPv6 add
+                       ress to listen in &lt;listen_host&gt; element of configuration
+                        &quot; &quot;file. 
+                        Example for disabled IPv6: 
+                        &lt;listen_host&gt;0.0.0.0&lt;/listen_host&gt; .&quot;
+                        &quot; Example for disabled IPv4: &lt;listen_host&gt;::&lt;/listen_host&gt;&quot;);
+                else
+                    throw;
+            }
+        }
+
+        //启动服务器
+        for (auto &amp; server : servers) {
+            server-&gt;start();
+        }
+        LOG_INFO(log, &quot;Ready for connections.&quot;);
+
+        //退出作用域时会调用对象的析构函数，因此此处在离开{}作用域时就会调用以下代码块
+        SCOPE_EXIT(
+        {
+            LOG_DEBUG(log, &quot;Received termination signal.&quot;);
+            LOG_DEBUG(log, &quot;Waiting for current connections to close.&quot;);
+            is_cancelled = true;
+            int current_connections = 0;
+            for (auto &amp; server : servers) {
+                server-&gt;stop();
+                current_connections += server-&gt;currentConnections();
+            }
+            ...
+            LOG_DEBUG( log, &quot;Closed connections.&quot; &lt;&lt; 
+            (current_connections ? &quot; But &quot; + std::to_string(current_connections) 
+            + &quot; remains.&quot; &quot; Tip: To increase wait time add to config:
+             &lt;shutdown_wait_unfinished&gt;60&lt;/shutdown_wait_unfinished&gt;&quot; : &quot;&quot;));
+        });
+
+        //等待外部终止应用
+        waitForTerminationRequest();
+    }
+
+    return  Poco::Util::Application::EXIT_OK;
+}</code></pre></div>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>关于SCOPE_EXIT宏，定义在util/Ext/scope_guard.h中，通过定义可知
+宏定义内部的{}实际上是转化为了一个lamda表达式函数，并作为scope_guard类的一个成员
+在类的析构函数中调用该lamda函数。
+而宏定义本身是定义了一个变量，因此SCOPE_EXIT的含义便是，当离开当前作用域时，
+调用lamda函数。因此main函数中，当外部终止时，会调用server-&gt;stop，然后再主函数返回之前
+调用global_context-&gt;reset().</code></pre>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>主函数中判定，如果配置项包含http_port，那么就启动一个http服务器。
+这个http服务器的具体处理函数在DataBase::HTTPHandlerFactory，
+该对象继承自Poco::Net::HTTPRequestHandlerFactory，并且重写了
+createRequestHandler函数</code></pre>
+<div class="framed" style="border:solid black 1px">
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>  //构造工厂，通过请求的不同类型来返回不同的处理对象指针
+    Poco::Net::HTTPRequestHandler* createRequestHandler
+    (const Poco::Net::HTTPServerRequest&amp; request) override {
+        LOG_TRACE(log,
+                  &quot;HTTP Request for &quot; &lt;&lt; name &lt;&lt; &quot;. &quot; 
+                  &lt;&lt; &quot;Method: &quot; &lt;&lt; request.getMethod() &lt;&lt;
+                   &quot;, Address: &quot; &lt;&lt; request.clientAddress().toString() 
+                   &lt;&lt; &quot;, User-Agent: &quot; &lt;&lt; (
+                      request.has(&quot;User-Agent&quot;) ? 
+                      request.get(&quot;User-Agent&quot;) : &quot;none&quot;));
+
+        const auto &amp; uri = request.getURI();
+
+        if (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET
+         || request.getMethod() == Poco::Net::HTTPRequest::HTTP_HEAD) {
+            if (uri == &quot;/&quot;) {
+                return new RootRequestHandler(server);
+            }
+            if (uri == &quot;/ping&quot;)
+            {
+                return new PingRequestHandler;
+            }
+        }
+
+        if (uri.find(&#39;?&#39;) != std::string::npos
+         || request.getMethod() == Poco::Net::HTTPRequest::HTTP_POST) {
+            return new HandlerType(server);
+        }
+
+        if (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET 
+        || request.getMethod() == Poco::Net::HTTPRequest::HTTP_HEAD 
+        || request.getMethod() == Poco::Net::HTTPRequest::HTTP_POST) {
+            return new NotFoundHandler;
+        }
+        return nullptr;
+    }</code></pre></div>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>每次请求都会打印一条trace日志,如果URI是 / 或 /ping ，那就分别对应各自的处理函数
+(返回一个OK.)
+如果是包含? 那么就以模板传入的处理类型为准
+如果都不是，那就返回404 NotFound，
+如果请求方法不支持，那么丢弃不处理。
+NotFoundHandler,RootRequestHandler,PingRequestHandler，模板传入类型
+都继承自Poco::Net::HTTPRequestHandler，并重写handleRequest方法</code></pre><h2 id="section" class="h1" data-heading-depth="1" style="display:block"><a href="#section" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">3</span>.&#8194;</span>其他说明</h2>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>以上描述仅仅是一部分，具体内容可以参考stage/stage.version.1.1.tar.gz
+stage目录下的内容是分阶段打包源码包（除了contrib的第三方源码目录外）</code></pre>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>关于kdevelop中，标准库对象的语义分析标记为黄色波浪线的问题：
+ 可能是gcc的include库未引用自安装的gcc-6的库导致。
+ 我的解决办法是通过修改注册表(update-alternative)来修改gcc、cpp、g++的指向。
+ 
+ 操作步骤如下（注意先安装gcc6）：
+ (
+  sudo apt-get install software-properties-common
+  sudo apt-add-repository ppa:ubuntu-toolchain-r/test
+  sudo apt-get update
+  sudo apt-get install gcc-6 g++-6
+ )
+ 1、查看
+   update-alternatives --display cc
+   update-alternatives --display c++
+   update-alternatives --display cpp
+   
+ 2、删除对应的软连接
+  sudo rm -f /usr/bin/cpp /usr/bin/g++ /usr/bin/gcc
+   
+ 3、登记注册信息
+   sudo update-alternatives --install /usr/bin/cpp cpp
+    /usr/bin/x86_64-linux-gnu-cpp-6 30
+    
+   sudo update-alternatives --install /usr/bin/gcc cc 
+   /usr/bin/x86_64-linux-gnu-gcc-6 30
+   
+   sudo update-alternatives --install /usr/bin/g++ c++
+    /usr/bin/x86_64-linux-gnu-g++-6 30
+    
+
+ 4、一般来说，登记过后，后面的30优先级值会是最大的，再次运行对应指令，就能指向正确版本
+  g++ -v  cpp -v  gcc -v
+  如果没有，可以通过 update-alternatives --config cc 这样的指令来手动选择对应gcc指向版本
+  
+ 5、 再次启动kdevelop，标准库语法分析错误的问题一般就会解决了</code></pre></div><span data-line=""></span></div>
+</body>
+<script type="text/javascript">
+  // ---------------------------------------------
+      // Classname helpers
+      // ---------------------------------------------
+      function hasClassName(elem,cname) {
+        if (elem==null) return false;
+        var regex = new RegExp("\\s*\\b" + cname + "\\b","g");
+        return regex.test(elem.className);
+      }
+      
+      function removeClassName(elem,cname) {
+        var regex = new RegExp("\\s*\\b" + cname + "\\b","g");
+        elem.className = elem.className.replace( regex, "" );
+      }
+      
+      function addClassName(elem,cname) {
+        if (!hasClassName(elem,cname)) elem.className = elem.className + " " + cname;
+      }
+      
+      function toggleClassName(elem,cname) {
+        var regex = new RegExp("\\s*\\b" + cname + "\\b","g");
+        var classes = elem.className;
+        if (regex.test(classes)) {
+          elem.className = classes.replace( regex, "" );
+          return false;
+        }
+        else {
+          elem.className = classes + " " + cname;
+          return true;
+        }
+      }
+      
+      // ---------------------------------------------
+      // Reliable offset determination
+      // ---------------------------------------------
+      
+      function getWindowOffset(elem) {
+        var box;
+        if (elem.getBoundingClientRect) {
+          box = elem.getBoundingClientRect();
+        }
+        else if (elem.offsetParent && elem.offsetParent.getBoundingClientRect) {
+          // text node
+          box = elem.offsetParent.getBoundingClientRect();
+          box.top = box.top + elem.offsetTop;
+          box.left = box.left + elem.offsetLeft;
+        }
+        else {
+          box = { top: 0, left : 0 };
+        }
+        return box;
+      }
+      
+      // Return the viewport position: -1 (before), 0 (visible), 1 (after)
+      function viewportPosition(elem) {
+        var pos = getWindowOffset(elem)
+        if (pos.top < 0 || pos.left < 0) 
+          return -1;
+        else if (pos.top > (window.innerHeight || document.documentElement.clientHeight) ||
+                 pos.left > (window.innerWidth || document.documentElement.clientWidth)) 
+          return 1;
+        else 
+          return 0;
+      }
+      
+      // ---------------------------------------------
+      // Expand the toc sections and align headers with the toc.
+      // ---------------------------------------------
+      
+      var side = document.getElementsByClassName("sidepanel")[0];
+      var afterScroll = null;
+      
+      // Align a heading at the top of the page with the toc
+      function alignHeading( elem ) {
+        var ofs     = getWindowOffset(elem).top;
+        var sideofs = getWindowOffset(side).top;
+        if (ofs >= 0 && ofs < sideofs) {
+          window.scrollBy(0, ofs - sideofs);
+        } 
+      }
+      
+      // Expand, or unexpand, one toc item
+      // The class is 'auto-expands' or 'click-expands'; the latter is sticky
+      // as it is user induced and will not be automatically unexpanded.
+      function itemExpand(item,cls,expand) {
+        // get possible toc block (that follows the item)
+        var tocblock = item.nextElementSibling;
+        if (tocblock==null || !hasClassName(tocblock,"tocblock")) return;
+       
+        // set expand class
+        if (expand===undefined) expand = !hasClassName(tocblock,"expands");
+        if (cls===undefined) cls = "auto-expands" 
+        if (cls==="click-expands") removeClassName(tocblock,"auto-expands");
+        if (expand && !hasClassName(tocblock,cls)) {
+          toggleClassName(tocblock,cls); 
+        }
+        else if (!expand && hasClassName(tocblock,cls)) {
+          toggleClassName(tocblock,cls);
+          item.firstElementChild.className = "unexpanded";
+        }
+        
+        // set expansion icon
+        if (hasClassName(tocblock,"auto-expands") || hasClassName(tocblock,"click-expands")) {
+          item.firstElementChild.className = "expanded";   
+        }
+        else {
+          item.firstElementChild.className = "unexpanded";
+        }
+      }
+      
+      // Expand a single item in the toc (and unexpand others).
+      function itemExpandOne(item) {
+        // unexpand anything that was expanded
+        [].forEach.call( document.querySelectorAll(".tocitem"), function(item) {
+          removeClassName(item,"current");
+          itemExpand(item,"auto-expands",false);      
+        });
+        addClassName(item,"current");
+        // expand the chain of parent blocks
+        var tocblock = null;
+        var toc = item.nextElementSibling;
+        if (toc && hasClassName(toc,"tocblock")) { 
+          tocblock = toc;
+        }
+        else {
+          tocblock = item.parentElement;
+        }
+        while(tocblock != null && !hasClassName(tocblock,"toc")) {
+          if (hasClassName(tocblock,"tocblock")) {
+            item = tocblock.previousElementSibling;
+            if (item != null) itemExpand(item,"auto-expands",true);
+          }
+          tocblock = tocblock.parentElement;
+        }
+      }
+      
+      // Auto expand the toc at current  position in the document 
+      function expandToc() {
+        // find the first section heading that is visible in the viewport 
+        var current = null;
+        [].every.call( document.querySelectorAll(".tocitem"), function(item) {
+          var target = document.getElementById( item.getAttribute("data-toc-target") );
+          var pos = viewportPosition(target);
+          if (pos <= 0) current = item;
+          return (pos < 0);
+        });
+        // if found, expand the corresponding item
+        if (current != null) itemExpandOne(current);
+      }
+      
+      document.addEventListener("load", function(ev) { expandToc(); });
+      document.addEventListener("resize", function(ev) { expandToc(); });
+      
+      // fire at end of scrolling
+      var scrollHandler = null;
+      document.addEventListener("scroll", function(ev) {
+        if (scrollHandler) clearTimeout(scrollHandler);
+        scrollHandler = setTimeout( function() {
+          scrollHandler = null;
+          if (afterScroll) {
+            afterScroll();
+            afterScroll = null;
+          }
+          else {
+            expandToc();
+          }
+        }, 50 );
+      });
+      
+      // ---------------------------------------------
+      // Install event handlers for all items in the TOC
+      // ---------------------------------------------
+      [].forEach.call( document.querySelectorAll(".tocitem"), function(item) {
+        // only for toc items with a target
+        var target = document.getElementById( item.getAttribute("data-toc-target") );
+        if (!target) return;
+        
+        // ensure every tocblock has a expansion icon in front
+        // (the optional nested tocblock follows the item)
+        var tocblock = null;
+        var toc = item.nextElementSibling;  
+        if (toc && hasClassName(toc,"tocblock")) { 
+          tocblock = toc;
+          item.innerHTML = "<span class='unexpanded'></span>" + item.innerHTML;   
+        } 
+        
+        // on a click
+        item.addEventListener( "click", function() {
+          // expand this toc item and set expansion icon
+          itemExpand(item,"click-expands");
+          // after navigation, align the heading with the toc
+          afterScroll = (function() {
+            alignHeading(target);
+          });    
+        }); 
+      });
+</script>
+
+</html>
