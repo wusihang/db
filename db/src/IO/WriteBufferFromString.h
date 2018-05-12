@@ -18,7 +18,7 @@ public:
 };
 
 namespace detail {
-/// For correct order of initialization.
+//不直接将value放在WriteBufferFromOwnString中作为成员变量的原因是为了保证value比buffer优先初始化
 class StringHolder {
 protected:
     std::string value;

@@ -24,6 +24,7 @@ public:
         end_pos = begin_pos + size;
     }
 
+    //交换两个buffer,只要简单交换buffer的起始指针即可
     inline void swap(Buffer & other) {
         std::swap(begin_pos, other.begin_pos);
         std::swap(end_pos, other.end_pos);
@@ -36,66 +37,69 @@ private:
 
 class BufferBase {
 public:
-    /** The constructor takes a range of memory to use for the buffer.
-     * offset - the starting point of the cursor. ReadBuffer must set it to the end of the range, and WriteBuffer - to the beginning.
+    /** 
+	 *  构造函数参数为,ptr: 内存起始地址,size: buffer尺寸,offset: 位置相对起始地址的偏移量
+	 *  对于读buffer来说,offset设置为结尾,  对于写buffer来说, offset设置为开头
      */
     BufferBase(Position ptr, size_t size, size_t offset)
         : internal_buffer(ptr, ptr + size), working_buffer(ptr, ptr + size), pos(ptr + offset) {
     }
 
+    //和构造函数参数含义一致
     void set(Position ptr, size_t size, size_t offset) {
         internal_buffer = Buffer(ptr, ptr + size);
         working_buffer = Buffer(ptr, ptr + size);
         pos = ptr + offset;
     }
 
-    /// get buffer
+    ///  获取buffer自身
     inline Buffer & internalBuffer() {
         return internal_buffer;
     }
 
-    /// get the part of the buffer from which you can read / write data
+    /// 获取可自由读写的buffer
     inline Buffer & buffer() {
         return working_buffer;
     }
 
-    /// get (for reading and modifying) the position in the buffer
+    /// 获取buffer的当前读写指针位置
     inline Position & position() {
         return pos;
     }
     ;
 
-    /// offset in bytes of the cursor from the beginning of the buffer
+    // 当前读写位置相对起始位置的偏移量
     inline size_t offset() const {
         return pos - working_buffer.begin();
     }
 
-    /** How many bytes have been read/written, counting those that are still in the buffer. */
+    //计算总共读取的字节数,包括已经读写的,还有当前buffer中正在读写的字节数
     size_t count() const {
         return bytes + offset();
     }
 
-    /** Check that there is more bytes in buffer after cursor. */
+    //检查当前指针位置之后是否还有buffer空间,也就是判断buffer是否还有空余空间
     bool __attribute__((__always_inline__))  hasPendingData() const {
         return pos != working_buffer.end();
     }
 
 protected:
-    /// A reference to a piece of memory for the buffer.
+    /// buffer内存区域
     Buffer internal_buffer;
 
-    /** A piece of memory that you can use.
+    /** 
+	 *  可用内存buffer区域
      * For example, if internal_buffer is 1MB, and from a file for reading it was loaded into the buffer
      *  only 10 bytes, then working_buffer will be 10 bytes in size
      *  (working_buffer.end() will point to the position immediately after the 10 bytes that can be read).
      */
     Buffer working_buffer;
 
-    /// Read/write position.
+    /// 读写内存位置
     Position pos;
 
-    /** How many bytes have been read/written, not counting those that are now in the buffer.
-     * (counting those that were already used and "removed" from the buffer)
+    /** 
+	 * 已经读写的字节数,不包括正在当前buffer中的字节
      */
     size_t bytes = 0;
 };

@@ -24,33 +24,42 @@ namespace IO
 class ReadBuffer : public BufferBase
 {
 public:
-    /** Creates a buffer and sets a piece of available data to read to zero size,
+    /**
+	 * 创建一个buffer,并且将可读数据大小设置为0,
+	 * 这样首次尝试时,next被调用用于load新数据的一部分到buffer
+	 * Creates a buffer and sets a piece of available data to read to zero size,
       *  so that the next() function is called to load the new data portion into the buffer at the first try.
       */
     ReadBuffer(Position ptr, size_t size) : BufferBase(ptr, size, 0) {
         working_buffer.resize(0);
     }
 
-    /** Used when the buffer is already full of data that can be read.
+    /** 
+	 * 当完整数据可读时,使用该构造函数
+	 * Used when the buffer is already full of data that can be read.
       *  (in this case, pass 0 as an offset)
       */
     ReadBuffer(Position ptr, size_t size, size_t offset) : BufferBase(ptr, size, offset) {}
 
+    //和第一个构造函数一样
     void set(Position ptr, size_t size) {
         BufferBase::set(ptr, size, 0);
         working_buffer.resize(0);
     }
 
-    /** read next data and fill a buffer with it; set position to the beginning;
+    /** 
+	 *  读取下一个数据并且填充buffer,将位置放置在起始
+	 * read next data and fill a buffer with it; set position to the beginning;
       * return `false` in case of end, `true` otherwise; throw an exception, if something is wrong
       */
     bool next()
     {
+		//更新读取的字节数
         bytes += offset();
+		//如果读到结尾了,那么返回false
         bool res = nextImpl();
         if (!res)
             working_buffer.resize(0);
-
         pos = working_buffer.begin() + working_buffer_offset;
         working_buffer_offset = 0;
         return res;
@@ -78,6 +87,7 @@ public:
         return !hasPendingData() && !next();
     }
 
+    //跳过一个字节
     void ignore()
     {
         if (!eof())
@@ -86,6 +96,7 @@ public:
             throw Poco::Exception("Attempt to read after EOF");
     }
 
+    //跳过至多n个字节
     void ignore(size_t n)
     {
         while (n != 0 && !eof())
@@ -94,12 +105,12 @@ public:
             pos += bytes_to_ignore;
             n -= bytes_to_ignore;
         }
-
+		//如果n>0,那么就意味着已经读到eof了,不允许再继续读了
         if (n)
             throw Poco::Exception("Attempt to read after EOF");
     }
 
-    /// You could call this method `ignore`, and `ignore` call `ignoreStrict`.
+    /// 尝试跳过n个字节,不抛出异常,返回实际忽略的字节数
     size_t tryIgnore(size_t n)
     {
         size_t bytes_ignored = 0;
@@ -118,7 +129,7 @@ public:
     size_t read(char * to, size_t n)
     {
         size_t bytes_copied = 0;
-
+		//开始时,working_buffer为空,会调用next首次读取
         while (bytes_copied < n && !eof())
         {
             size_t bytes_to_copy = std::min(static_cast<size_t>(working_buffer.end() - pos), n - bytes_copied);

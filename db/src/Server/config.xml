@@ -16,4 +16,6 @@
 	<interserver_http_port> 19009</interserver_http_port>
 <!-- 	<interserver_http_host></interserver_http_host> -->
 	<http_port>8123</http_port>
+	
+	<listen_host>0.0.0.0</listen_host>
 </db>

@@ -9,6 +9,7 @@
 #include <CommonUtil/SystemUtil.h>
 #include<CommonUtil/FileUtil.h>
 #include <CommonUtil/StringUtils.h>
+#include <CommonUtil/ConfigurationUtil.h>
 #include<Poco/File.h>
 #include<Poco/Timespan.h>
 #include<Poco/DirectoryIterator.h>
@@ -87,7 +88,7 @@ int DataBase::Server::main(const std::vector< std::string >& args)
         }
     }
 
-	//退出主函数时析构，即退出时调用
+    //退出主函数时析构，即退出时调用
     SCOPE_EXIT( {
         LOG_INFO(log, "Shutting down storages.");
         LOG_DEBUG(log, "Shutted down storages.");
@@ -102,14 +103,18 @@ int DataBase::Server::main(const std::vector< std::string >& args)
         http_params->setTimeout(60000);
         http_params->setKeepAliveTimeout(keep_alive_timeout);
         std::vector<std::unique_ptr<Poco::Net::TCPServer>> servers;
-        std::vector<std::string> listen_hosts;
+		//多网卡时,需要确认是哪个ip作为服务器对外服务
+		//如果需要所有ip都生效,那么就可以使用0.0.0.0
+		//如果需要支持ipv6,那么可以使用::
+		//如果只允许本机访问,那么可以指定::1和127.0.0.1
+        std::vector<std::string> listen_hosts = ConfigurationUtil::getMultipleValuesFromConfig(config(),"","listen_host");
         bool try_listen = false;
         if (listen_hosts.empty()) {
             listen_hosts.emplace_back("::1");
             listen_hosts.emplace_back("127.0.0.1");
             try_listen = true;
         }
-        
+
         //构建socket监听地址函数
         auto make_socket_address = [&](const std::string & host, std::uint16_t port) {
             Poco::Net::SocketAddress socket_address;

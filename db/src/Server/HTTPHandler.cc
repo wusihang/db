@@ -7,7 +7,11 @@
 #include<Interpreter/ExecuteQuery.h>
 #include<Poco/Net/HTTPServerRequest.h>
 #include<Poco/Net/HTTPServerResponse.h>
+#include<IO/ReadBuffer.h>
+#include <IO/ReadBufferFromString.h>
+#include <IO/WriteBufferFromHTTPServerResponse.h>
 #include<istream>
+#include<Ext/std_ext.h>
 
 DataBase::HttpHandler::HttpHandler(IServer& server_)
     : server(server_), log(&Poco::Logger::get("HTTPHandler")) {
@@ -42,6 +46,11 @@ void DataBase::HttpHandler::processQuery(Poco::Net::HTTPServerRequest & request,
     if (!query_param.empty()) {
         query_param += '\n';
     }
-    
+    std::unique_ptr<IO::ReadBuffer> in_param = std_ext::make_unique<IO::ReadBufferFromString>(query_param);
+    std::shared_ptr<IO::WriteBufferFromHTTPServerResponse> out
+        = std::make_shared<IO::WriteBufferFromHTTPServerResponse>(response);
+    DataBase::executeQuery(*in_param,*out);
+
+    out->finalize();
 }
 
