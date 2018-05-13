@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <meta name="generator" content="Madoko, version 1.1.6" />
+  <meta name="viewport" content="initial-scale=1.0" />
+  <meta name="author" content="" />
+  <meta name="description" content="Provides popup anchor links to headings in a web page.
+     This makes it easier for others to link to specific sections
+     in a large web manual or book." />
+  <title>3、简单版HTTP服务器（参数处理并返回）</title>
+  <style type="text/css"  class="link">
+  /*# sourceURL=madoko.css */
+  
+  .madoko .toc>.tocblock .tocblock .tocblock {
+    margin-left: 2.25em;
+  }
+  .madoko .toc>.tocblock .tocblock {
+    margin-left: 1.5em;
+  }
+  .madoko .toc-contents>.tocblock>.tocitem {
+    font-weight: bold;
+  }
+  .madoko .toc {
+    margin-top: 1em;
+  }
+  .madoko p.para-continue {
+    margin-bottom: 0pt;
+  }
+  .madoko .para-block+p {
+    margin-top: 0pt;
+  }
+  .madoko ul.para-block, .madoko ol.para-block {
+    margin-top: 0pt;
+    margin-bottom: 0pt;
+  }
+  .madoko ul.para-end, .madoko ol.para-end {
+    margin-bottom: 1em;
+  }
+  .madoko dl {
+    margin-left: 0em;
+  }
+  .madoko blockquote {
+    font-style: italic;
+  }
+  .madoko a.localref {
+    text-decoration: none;
+  }
+  .madoko a.localref:hover {
+    text-decoration: underline;
+  }
+  .madoko .footnotes {
+    font-size: smaller;
+    margin-top: 2em;
+  }
+  .madoko .footnotes hr {
+    width: 50%;
+    text-align: left;
+  }
+  .madoko .footnote { 
+    margin-left: 1em;
+  }
+  .madoko .footnote-before {
+    margin-left: -1em;
+    width: 1em;
+    display: inline-block;
+  }
+  .madoko .align-center, .madoko .align-center>p {
+    text-align: center !important;
+  }
+  .madoko .align-center pre {
+    text-align: left;
+  }
+  .madoko .align-center>* {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .madoko .align-left, .madoko .align-left>p {
+    text-align: left !important;
+  }
+  .madoko .align-left>* {
+    margin-left: 0pt !important;
+    margin-right: auto !important;
+  }
+  .madoko .align-right, .madoko .align-right>p {
+    text-align: right !important;
+  }
+  .madoko .align-right>* {
+    margin-left: auto !important;
+    margin-right: 0pt !important;
+  }
+  .madoko .align-center>table,
+  .madoko .align-left>table,
+  .madoko .align-right>table {
+    text-align: left !important;
+  }
+  .madoko .equation-before {
+    float: right;
+  }
+  .madoko .bibitem {
+    font-size: smaller;
+  }
+  .madoko .bibsearch {
+    font-size: x-small;
+    text-decoration:none;
+    color: black;
+    font-family: "Segoe UI Symbol", Symbola, serif;
+  }
+  .madoko .block, .madoko .figure, .madoko .bibitem, .madoko .equation, .madoko div.math {
+    margin-top: 1ex;
+    margin-bottom: 1ex;
+  }
+  .madoko .figure {
+    padding: 0.5em;
+    margin-left: 0pt;
+    margin-right: 0pt;
+  }
+  .madoko .hidden {
+    display: none;
+  }
+  .madoko .invisible {
+    visibility: hidden;
+  }
+  .madoko.preview .invisible {
+    visibility: visible;
+    opacity: 0.5;
+  }
+  .madoko code.code, .madoko span.code {
+    white-space: pre-wrap;
+  }
+  .madoko hr, hr.madoko {
+    border: none;
+    border-bottom: black solid 1px;
+    margin-bottom: 0.5ex;
+  }
+  .madoko .framed>*:first-child {
+    margin-top: 0pt;
+  }
+  .madoko .framed>*:last-child {
+    margin-bottom: 0pt;
+  }
+  .madoko ul.list-style-type-dash {
+      list-style-type: none !important;
+  }
+  .madoko ul.list-style-type-dash > li:before {
+      content: "\2013"; 
+      position: absolute;
+      margin-left: -1em; 
+  }
+  .madoko table.madoko {
+    border-collapse: collapse;
+  }
+  .madoko td, .madoko th {
+    padding: 0ex 0.5ex;
+    margin: 0pt;
+    vertical-align: top;
+  }
+  .madoko .cell-border-left {
+    border-left: 1px solid black;
+  }
+  .madoko .cell-border-right {
+    border-right: 1px solid black;
+  }
+  .madoko thead>tr:first-child>.cell-line,
+  .madoko tbody:first-child>tr:first-child>.cell-line {
+    border-top: 1px solid black;
+    border-bottom: none;
+  }
+  .madoko .cell-line, .madoko .cell-double-line {
+    border-bottom: 1px solid black;
+    border-top: none;
+  }
+  .madoko .cell-double-line {
+    border-top: 1px solid black;
+    padding-top: 1.5px !important;
+  }
+  .madoko .input-mathpre .MathJax_Display {
+    text-align: left !important;
+  }
+  .madoko div.input-mathpre {
+    text-align: left;
+    margin-top: 1.5ex;
+    margin-bottom: 1ex;
+  }
+  .madoko .math-rendering {
+    text-align: left;
+    white-space: pre;
+    color: gray;
+  }
+  .madoko .mathdisplay {
+    text-align: center;
+  }
+  .madoko .pretty table {
+    border-collapse: collapse;
+  }
+  .madoko .pretty td {
+    padding: 0em;
+  }
+  .madoko .pretty td.empty {
+    min-width: 1.5ex;
+  }
+  .madoko .pretty td.expander {
+    width: 100em;
+  }
+  body.madoko, .madoko .serif {
+    font-family: Cambria,"Times New Roman","Liberation Serif","Times",serif;
+  }
+  .madoko .sans-serif {
+    font-family: "Calibri", "Optima", sans-serif;
+  }
+  .madoko .symbol {
+    font-family: "Segoe UI Symbol", Symbola, serif;
+  }
+  body.madoko {  
+    -webkit-text-size-adjust: 100%;       
+    text-rendering: optimizeLegibility;
+  }
+  body.madoko {
+    max-width: 88ex; 
+    margin: 1em auto;
+    padding: 0em 2em;  
+  }
+  body.preview.madoko {
+    padding: 0em 1em;
+  }
+  .madoko p {
+    text-align: justify;
+  }
+  .madoko h1, .madoko h2, .madoko h3, .madoko h4 { 
+    margin-top: 1.22em; 
+    margin-bottom: 1ex;
+  }
+  .madoko h1+p, .madoko h2+p, .madoko h3+p, .madoko h4+p, .madoko h5+p  { 
+    margin-top: 1ex;    
+  }
+  .madoko h5, .madoko h6 { 
+    margin-top: 1ex;
+    font-size: 1em;
+  }
+  .madoko h5 { 
+    margin-bottom: 0.5ex;
+  }
+  .madoko h5 + p {
+    margin-top: 0.5ex;
+  }
+  .madoko h6 { 
+    margin-bottom: 0pt;
+  }
+  .madoko h6 + p {
+    margin-top: 0pt;
+  }
+  .madoko pre, .madoko code, .madoko kbd, .madoko samp, .madoko tt, 
+  .madoko .monospace, .madoko .token-indent, .madoko .reveal pre, .madoko .reveal code, .madoko .email {
+    font-family: Consolas,"Andale Mono WT","Andale Mono",Lucida Console,Monaco,monospace,monospace;
+    font-size: 0.85em;
+  }
+  .madoko pre code, .madoko .token-indent {
+    font-size: 0.95em;
+  }
+  .madoko pre code {
+    font-family: inherit !important;
+  }
+  .madoko ol.linenums li {
+    background-color: white;
+    list-style-type: decimal;
+  }
+  .madoko .remote {
+    background-color: #F0FFF0;
+  }
+  .madoko .remote + * {
+    margin-top: 0pt;
+  }
+  @media print {
+    body.madoko {
+      font-size: 10pt;
+    }
+    @page {
+      margin: 1in 1.5in;
+    }
+  }
+  @media only screen and (max-device-width:1024px) {
+    body.madoko {
+      padding: 0em 0.5em;    
+    }
+    .madoko li {
+      text-align: left;
+    }
+  }
+  
+    </style>
+  
+  <style>
+    /* ---------------------------------------------
+          Center document in the viewport
+        ----------------------------------------------*/
+        body.madoko {
+          margin: 0pt;
+          padding: 0pt;
+          max-width: 100%;
+        }
+        .body {
+          width: 70em;
+          max-width: 90%;
+          margin: 1em auto;
+        }
+        .preview .body {
+          width: 98%;
+          max-width: 100%;
+          margin: 0.25em auto;
+        }
+        
+        /* -----------------------------------------
+           Settings for a wide viewport:
+           The contents are shown in the side panel
+           on the left side.
+        -------------------------------------------- */
+        @media (min-width: 1024px) {
+          body.madoko {
+            padding-right: 8%; /* looks more balanced with sidepanel */
+          }       
+          .sidepanel {
+            width   : 14rem ; 
+            position: fixed;
+            top     : 3rem ;
+            max-height: 90%;
+            overflow-y: auto;
+          }
+          .mainpanel, .footnotes, .titleblock {
+            margin-left: calc(14rem + 4rem + 2px + 1rem);
+          }
+          .tocblock2, .tocblock3 {
+            display:none;
+          }
+          .tocblock.auto-expands, .tocblock.click-expands {
+            display:block;
+          }     
+          /*
+          .tocitem.current::after {
+            content: "\00A0\25CF";
+          }
+          */
+          .tocitem.current .heading-label {
+            font-weight: bold;
+          }      
+          span.unexpanded, span.expanded {
+            display: inline-block;
+            width: 1.25em;
+            margin-left: -1.25em;
+            font-family: "Segoe UI Symbol", Symbola, serif;
+            font-size: 70%;
+            cursor: pointer;
+            vertical-align: 0.1em;
+          }
+          span.unexpanded::before {
+            content: "\25B6";
+          }
+          span.expanded::before {
+            content: "\25BC";
+          }
+        }
+        
+        /* ---------------------------------------------------
+           Set margins and padding for side panel and sections
+        ------------------------------------------------------ */
+        .sidepanel, .mainpanel section, .footnotes {
+          padding: 0pt 1rem 0.25rem 1rem;
+        }
+        .sidepanel .tocblock {
+          font-size  : small;
+          white-space: nowrap;
+        }
+        .sidepanel .toc, .sidepanel h2, .sidepanel h1 {
+          margin-top: 0pt;
+        }
+        .footnotes {
+          padding-top: 0.5em; 
+        }
+        .footnotes>hr {
+          display:none;
+        }
+        section,.sidepanel {
+          margin-bottom: 1em;
+        }
+        
+        /* -----------------------------------
+           Nice scrollbar for toc
+        ----------------------------------- */
+        .sidepanel::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }     
+        /* Track */
+        .sidepanel::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 4px rgba(0,0,0,0.3); 
+            -webkit-border-radius: 6px;
+            border-radius: 6px;
+        }    
+        /* Handle */
+        .sidepanel::-webkit-scrollbar-thumb {
+            -webkit-border-radius: 6px;
+            border-radius: 6px;
+            background: lightgray; 
+            -webkit-box-shadow: inset 0 0 4px rgba(0,0,0,0.5); 
+        }
+        .sidepanel::-webkit-scrollbar-thumb:window-inactive {
+          background: gainsboro; 
+        }
+        .madoko .toc > .tocblock .tocblock .tocblock {
+          margin-left: 1.5em;
+        }
+        .madoko .toc a {
+          color: #444; 
+        }
+    h0:hover .entity-anchor,
+        h1:hover .entity-anchor,
+        h2:hover .entity-anchor,
+        h3:hover .entity-anchor {
+          display: inline-block;
+        }
+        
+        a.entity-anchor {
+          color: black;
+        }
+        
+        a.localref.entity-anchor:hover {
+          text-decoration: none;
+        }
+        
+        .entity-anchor {
+          display: none;
+          width: 0.8em;
+          margin-left: -0.8em;
+          font-family: "Segoe UI Symbol", Symbola, serif;
+          font-size: 80%;
+        }
+  </style>
+  </head>
+<body class="madoko">
+
+<div class="body madoko" style="line-adjust:0">
+
+<div class="titleblock align-center para-block" style="text-align:center;line-adjust:0">
+<div class="titleheader align-center" style="text-align:center;line-adjust:0">
+<div class="title para-block" style="font-size:xx-large;font-weight:bold;margin-bottom:0.5ex;line-adjust:0">3、简单版HTTP服务器（参数处理并返回）</div></div>
+<div class="authors align-center" style="text-align:center;width:80%;line-adjust:0"><table class="authorrow columns block" style="margin-top:2ex;width:100%;line-adjust:0">
+<tbody><tr><td class="author column" style="text-align:center;line-adjust:0">
+<div class="authoremail email" style="line-adjust:0">wusihang9@139.com</div></td></tr></tbody></table></div></div>
+<div class="sidepanel"><span data-line=""></span>
+<nav class="toc toc-contents">
+<div class="tocblock tocblock1">
+<div class="tocitem tocitem1" data-toc-target-elem="h1" data-toc-target="sec-intro" data-toc-depth="1" data-toc-line="[1]{.heading-label}.&#8194;\u5E26?query\u7684HTTP\u8BF7\u6C42\u5904\u7406" style="toctarget:sec-intro"><a href="#sec-intro" class="localref"><span class="heading-label">1</span>.&#8194;带?query的HTTP请求处理</a></div>
+<div class="tocblock tocblock2">
+<div class="tocitem tocitem2" data-toc-target-elem="h2" data-toc-target="section" data-toc-depth="2" data-toc-line="[1.1]{.heading-label}.&#8194;\u5904\u7406\u7C7B\u5B9A\u4E49" style="toctarget:section"><a href="#section" class="localref"><span class="heading-label">1.1</span>.&#8194;处理类定义</a></div>
+<div class="tocitem tocitem2" data-toc-target-elem="h2" data-toc-target="sec-http" data-toc-depth="2" data-toc-line="[1.2]{.heading-label}.&#8194;\u5B9A\u4E49HTTP\u54CD\u5E94\u7684\u5199\u7F13\u51B2" style="toctarget:sec-http"><a href="#sec-http" class="localref"><span class="heading-label">1.2</span>.&#8194;定义HTTP响应的写缓冲</a></div></div>
+<div class="tocitem tocitem1" data-toc-target-elem="h1" data-toc-target="section" data-toc-depth="1" data-toc-line="[2]{.heading-label}.&#8194;\u5176\u4ED6\u8BF4\u660E" style="toctarget:section"><a href="#section" class="localref"><span class="heading-label">2</span>.&#8194;其他说明</a></div></div></nav></div>
+<div class="mainpanel">
+<h2 id="sec-intro" class="h1" data-heading-depth="1" style="display:block"><a href="#sec-intro" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">1</span>.&#8194;</span>带?query的HTTP请求处理</h2><h3 id="section" class="h2" data-heading-depth="2" style="display:block"><a href="#section" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">1.1</span>.&#8194;</span>处理类定义</h3>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>还是一样，定义一个HttpHandler，继承自Poco::Net::HTTPRequestHandler，
+然后重写handleRequest方法。下面来关注一下该方法：</code></pre>
+<div class="framed" style="border:solid black 1px">
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>  handleRequest方法：
+  ...
+         response.setContentType(&quot;text/plain; charset=UTF-8&quot;);
+        /// keep-alive
+        if (request.getVersion() == Poco::Net::HTTPServerRequest::HTTP_1_1) {
+            response.setChunkedTransferEncoding(true);
+        }
+        DataBase::HTMLForm params(request);
+        processQuery(request,params,response);
+        response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_OK);
+        response.send();
+        LOG_INFO(log, &quot;Done processing query&quot;);
+
+  ...
+  
+  processQuery方法：
+  ...
+    std::istream &amp; istr = request.stream();
+    std::string query_param = params.get(&quot;query&quot;, &quot;&quot;);
+    std::unique_ptr&lt;IO::ReadBuffer&gt; in_param = 
+    std_ext::make_unique&lt;IO::ReadBufferFromString&gt;(query_param);
+    std::shared_ptr&lt;IO::WriteBufferFromHTTPServerResponse&gt; out
+        = std::make_shared&lt;IO::WriteBufferFromHTTPServerResponse&gt;(response);
+    DataBase::executeQuery(*in_param,*out);
+    out-&gt;finalize();
+  ...</code></pre></div>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>  handleRequest方法中，从请求reqeust自定义了一个HTMLForm对象，而后作为参数进行查询；
+    该对象继承  自Poco的HTMLForm类，自定义的只是添加了两个模板函数，
+    用于指定参数类型的转换操作。  而类型转换由IO包下的ReadHelper完成。
+  processQuery方法中,获取了query参数后，构建了一个ReadBuffer和基于response的WriteBuffer，
+    而后传入executeQuery方法，这个方法就是后续要添加数据库操作的地方。
+    目前暂时简单实现。而关于WriteBufferFromHTTPServerResponse的构建，在下一小节描述。</code></pre><h3 id="sec-http" class="h2" data-heading-depth="2" style="display:block"><a href="#sec-http" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">1.2</span>.&#8194;</span>定义HTTP响应的写缓冲</h3>
+<p class="p noindent">WriteBufferFromHTTPServerResponse类继承自BufferWithOwnMemory<WriteBuffer><br>
+BufferWithOwnMemory.h的定义中，最重要的就是Memory成员对象。<br>
+Memory成员继承自Allocator<false>，该类定义了三个方法，alloc,free,realloc<br>
+具体实现是在某个范围内使用系统自带的内存分配策略，当内存分配大小超过一定阈值后，<br>
+内存分配采用mmap来映射。关于mmap放在其他说明中解释。
+</p><h2 id="section" class="h1" data-heading-depth="1" style="display:block"><a href="#section" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">2</span>.&#8194;</span>其他说明</h2>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>以上描述仅仅是一部分，具体内容可以参考stage/stage.version.1.2.tar.gz
+stage目录下的内容是分阶段打包源码包（除了contrib的第三方源码目录外）</code></pre>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>--关于mmap:
+1、 基础概念
+内存映射文件的方法，将一个文件或者其他对象映射到进程的地址空间。  
+实现文件磁盘地址和进程虚拟地址空间中一段虚拟地址的一一对应关系。 
+实现这样的映射后，进程就可以采用指针的方式读写操作这一段内存，
+而系统会自动回写脏页到对应的文件磁盘上。
+也就是说，完成文件操作不再需要调用read,write等系统调用函数。 
+相反，内核空间对这段区域的修改也直接反映了用户空间，从而可以实现不同进程间的文件共享。
+从下图可以看出，进程的虚拟地址空间由多个虚拟内存区域构成。为内存映射服务的地址空间
+处于堆栈之间的空余部分。
+
+
+linux内核使用了vm_area_struct结构来表示一个独立的虚拟内存区域。
+每个不同质的虚拟内存区域功能和内部机制不同，
+因此一个进程会使用多个vm_area_struct结构来分别表示不同类型的虚拟内存区域。
+各个vm_area_struct结构使用链表或树形结构方式链接，方便进程快速访问。
+vm_area_struct包含区域的起始地址，终止地址以及其他一些信息，也包含一个vm_ops指针
+，其内部可引出所有针对这个区域可以使用的系统调用函数。
+这样，进程对某一个虚拟内存区域的任何操作需要用的信息都可以从vm_area_struct中获得。
+mmap函数就是要创建一个新的vm_area_struct结构，并将其与文件物理磁盘地址相连。
+
+
+2、 内存映射基本原理
+总的来说可以分为三个阶段：
+①进程启动映射过程，并在虚拟地址空间中为映射创建虚拟映射区域。
+1、进程在用户空间调用库函数mmap，原型：
+   void *mmap(void *start, size_t length, int prot, int flags, int fd, off_t offset);
+2、在当前进程的虚拟地址空间中，寻找一段空闲的满足要求的连续的虚拟地址
+3、为此虚拟区分配一个vm_area_struct结构，接着对这个结构的各个域进行了初始化
+4、将新建的虚拟区结构（vm_area_struct）插入进程的虚拟地址区域链表或树中
+②调用内核空间的系统调用函数mmap（和用户空间mmap函数不同），实现文件物理地址和
+    进程虚拟地址的一一映射关系
+5、  为映射分配了新的虚拟地址区域后，通过待映射的文件指针，
+在文件描述符表中找到对应的文件描述符，通过文件描述符，
+链接到内核“已打开文件集”中该文件的文件结构体（struct file），
+每个文件结构体维护着和这个已打开文件相关各项信息。
+6、通过该文件的文件结构体，链接到file_operations模块，
+      调用内核函数mmap，其原型为：
+      int mmap(struct file *filp, struct vm_area_struct *vma)，不同于用户空间库函数。
+7、内核mmap函数通过虚拟文件系统inode模块定位到文件磁盘物理地址。
+8、通过remap_pfn_range函数建立页表，即实现了文件地址和虚拟地址区域的映射关系。
+      此时，这片虚拟地址并没有任何数据关联到主存中。
+③进程发起对这片映射空间的访问，引发缺页异常，实现文件内容到物理内存的拷贝
+（前两步仅在于创建映射，但是并没有任何文件数据操作，读写发生在进程发起读写时）
+9、进程的读或写操作访问虚拟地址空间这一段映射地址，通过查询页表，
+      发现这一段地址并不在物理页面上。因为目前只建立了地址映射，
+       真正的硬盘数据还没有拷贝到内存中，因此引发缺页异常。
+10、缺页异常进行一系列判断，确定无非法操作后，内核发起请求调页过程。
+11、调页过程先在交换缓存空间（swap cache）中寻找需要访问的内存页，
+       如果没有则调用nopage函数把所缺的页从磁盘装入到主存中。
+12、之后进程即可对这片主存进行读或者写的操作，如果写操作改变了其内容，
+       一定时间后系统会自动回写脏页面到对应磁盘地址，也即完成了写入到文件的过程。
+注：修改过的脏页面并不会立即更新回文件中，而是有一段时间的延迟，
+可以调用msync()来强制同步, 这样所写的内容就能立即保存到文件里了。
+
+3、 mmap和常规文件操作的区别
+① 系统调用(read/write)的操作过程
+1、 进程发起读文件请求
+2、内核通过查找进程文件符表，定位到内核已打开文件集上的文件信息，
+     从而找到文件的inode
+3、inode在address_space上查找要请求的文件页是否已缓存在页缓存中，如果存在，
+则直接返回这片文件页的内容。
+4、 如果不存在，通过inode定位到文件磁盘地址，将数据从磁盘复制到页缓存，之后再次
+发起读页过程，进而将页缓存中的数据发给用户进程。
+===》 总的来说，常规文件操作为了提高读写效率和保护磁盘，使用了页缓存机制。这样造成读
+文件时需要先将文件页从磁盘拷贝到页缓存，页缓存处于内核空间，不能被用户进程直接寻址，
+所以页缓存中的数据页再次拷贝到内存对应的用户空间中，这样，通过两次数据拷贝过程才完成
+进程对文件内容的获取任务。写操作也是一样。
+② 使用mmap操作文件
+创建虚拟内存区域和建立文件磁盘地址和虚拟内存区域映射，没有任何文件拷贝操作。
+而之后访问数据时发现内存中并无数据而引发缺页异常过程，可以通过建立好的映射关系，
+使用一次数据拷贝就从磁盘中将数据传入内存的用户空间中，供进程使用。
+也就是说mmap方式操作文件，相比于传统操作，少了一次数据拷贝过程！！
+
+4、 mmap的优点
+1、对文件的读取操作跨过了页缓存，减少了数据的拷贝次数，
+     用内存读写取代I/O读写，提高了文件读取效率。
+2、实现了用户空间和内核空间的高效交互方式。
+    两空间的各自修改操作可以直接反映在映射的区域内，从而被对方空间及时捕捉。
+3、提供进程间共享内存及相互通信的方式。不管是父子进程还是无亲缘关系的进程，
+     都可以将自身用户空间映射到同一个文件或匿名映射到同一片区域。
+     从而通过各自对映射区域的改动，达到进程间通信和进程间共享的目的。
+     同时，如果进程A和进程B都映射了区域C，当A第一次读取C时通过缺页从磁盘
+     复制文件页到内存中；但当B再读C的相同页面时，虽然也会产生缺页异常，
+     但是不再需要从磁盘中复制文件过来，而可直接使用已经保存在内存中的文件数据。
+4、可用于实现高效的大规模数据传输。内存空间不足，是制约大数据操作的一个方面，
+    解决方案往往是借助硬盘空间协助操作，补充内存的不足。
+    但是进一步会造成大量的文件I/O操作，极大影响效率。
+    这个问题可以通过mmap映射很好的解决。换句话说，
+    但凡是需要用磁盘空间代替内存的时候，mmap都可以发挥其功效。
+
+5、 mmap相关函数
+① mmap函数
+原型：
+void *mmap(void *start, size_t length, int prot, int flags, int fd, off_t offset);
+返回说明：
+成功执行时，mmap()返回被映射区的指针。
+失败时，mmap()返回MAP_FAILED[其值为(void *)-1]， error被设为以下的某个值:
+
+参数说明:
+start       映射区的开始地址
+length      映射区长度
+prot        期望的内存保护标志，不能与文件的打开模式冲突，是以下某值，or运算结合。
+
+        flags        指定映射对象的类型，映射选项和映射页是否可以共享，可以是以下值的组合：
+  MAP_FIXED //使用指定的映射起始地址，
+//如果由start和len参数指定的内存区重叠于现存的映射空间，
+//重叠部分将会被丢弃。如果指定的起始地址不可用，操作
+//将会失败。并且起始地址必须落在页的边界上。
+  MAP_SHARED //与其它所有映射这个对象的进程共享映射空间。
+//对共享区的写入，相当于输出到文件。
+//直到msync()或者munmap()被调用，文件实际上不会被更新。
+  MAP_PRIVATE //建立一个写入时拷贝的私有映射。
+//内存区域的写入不会影响到原文件。
+//这个标志和以上标志是互斥的，只能使用其中一个。
+  MAP_DENYWRITE //这个标志被忽略。
+  MAP_EXECUTABLE //同上
+  MAP_NORESERVE //不要为这个映射保留交换空间。当交换空间被保留，
+//对映射区修改的可能会得到保证。
+//当交换空间不被保留，同时内存不足，
+//对映射区的修改会引起段违例信号。
+ MAP_LOCKED //锁定映射区的页面，从而防止页面被交换出内存。
+ MAP_GROWSDOWN //用于堆栈，告诉内核VM系统，映射区可以向下扩展。
+ MAP_ANONYMOUS //匿名映射，映射区不与任何文件关联。
+ MAP_ANON //MAP_ANONYMOUS的别称，不再被使用。
+ MAP_FILE //兼容标志，被忽略。
+ MAP_32BIT //将映射区放在进程地址空间的低2GB，
+//MAP_FIXED指定时会被忽略。
+//当前这个标志只在x86-64平台上得到支持。
+ MAP_POPULATE //为文件映射通过预读的方式准备好页表。
+//随后对映射区的访问不会被页违例阻塞。
+ MAP_NONBLOCK //仅和MAP_POPULATE一起使用时才有意义。
+//不执行预读，只为已存在于内存中的页面建立页表入口。
+fd    有效的文件描述词。如果MAP_ANONYMOUS被设定，为了兼容问题，设为-1
+offset    被映射对象内容的起点
+②munmap函数
+原型：
+int munmap(void * addr  , size_t len)
+返回值：
+成功执行时，返回0 ，失败时，返回-1， error返回标志和mmap一致。
+含义：
+调用在进程地址空间中解除一个映射关系，addr是电泳mmap时返回的地址，len是映射区
+的大小，当映射关系解除后，对原来的映射地址的访问将导致段错误发生。
+③ msync函数
+原型：
+int msync(void* addr , size_t len , int flags)
+一般来说，进程在映射空间对共享内容的改变并不直接写回磁盘文件中，往往在调用
+munmap后才执行该动作。 可以使用msync实现磁盘上的文件内容与共享内存区的
+内容一致。
+6、 mmap使用细节
+① mmap的映射区域大小必须是物理页大小（page_size）的整数倍，32位系统通常是4K。
+原因是，内存的最小粒度是页，而进程的虚拟地址空间和内存的映射也是以页为单位。
+为了匹配内存操作，mmap从磁盘到虚拟地址空间的映射也必须是页。
+② 内核可以跟踪被内存映射的底层对象（文件）的大小。进程可以合法地访问在当前文件
+大小以内又在内存映射区以外的那些字节。也就是说，如果文件的大小一直在扩张，
+只要在映射区域范围内的数据，进程都可以合法得到。这和映射建立时的文件大小无关。
+③ 映射建立后，即使文件关闭，映射依然存在。因为映射的是磁盘的地址，不是文件本身。
+和文件句柄并无关系。同时可用于进程间通信的有效地址空间不完全受限于被映射文件
+的大小，因为是按页映射。
+
+基于以上知识，看看如果大小不是页整数倍的具体情况：
+情形1：一个文件大小是5000字节，mmap函数从一个文件的起始位置开始，映射5000字节
+到虚拟内存。
+===》 物理页大小为4096字节，虽然被映射文件只有5000字节，但是对应进程虚拟地址
+区域的大小需要满足整页大小，因此mmap函数执行后，实际映射到虚拟内存区域有8192个
+字节，5000~8191的字节部分用0填充。
+这时候，1）读写前5000字节，会返回操作文件内容
+2）读5000~8191,结果全为0；写5000~8191，进程不会报错，但是所写内容
+不会写入到原文件中。
+3） 读写8192以外的磁盘部分，返回一个SIGSECV错误。
+情形2： 一个文件的大小是5000字节，mmap函数从一个文件的起始位置开始，映射15000
+字节到虚拟内存中，映射大小超过了原始文件大小。
+==》 和情形1一样，对应两个物理页。
+1） 进程可以正常读写前5000字节。
+2） 5000~8191字节，进程可以正常进行读写过程，但是内容写入前均为0，写入后
+不会反映在文件中。
+3) 对应8192~14999字节，进程不能对其进行读写，会报SIGBUS错误
+4） 15000以外字节，进程不能读写，会报SIGSEGV错误
+
+情形3： 一个文件的初始大小为0 ， 使用mmap操作映射了1000*4K的大小。
+mmap返回指针ptr
+==》如果在映射建立之初就对文件进行读写操作，由于文件大小为0，并没有合法
+的物理页与之对应，如果情形2，会返回SIGBUS错误。
+但是如果每次操作ptr读之前，先增加文件的大小，那么ptr在文件大小内部的操作就
+是合法的！ 例如，文件扩充4096字节，ptr几句能操作ptr~[ptr+4095]，只要扩充
+范围在1000个物理页内，ptr都可以对应操作相同的大小。
+这样，方便随时扩充文件空间，随时写入文件，不造成空间浪费。
+</code></pre></div><span data-line=""></span></div>
+</body>
+<script type="text/javascript">
+  // ---------------------------------------------
+      // Classname helpers
+      // ---------------------------------------------
+      function hasClassName(elem,cname) {
+        if (elem==null) return false;
+        var regex = new RegExp("\\s*\\b" + cname + "\\b","g");
+        return regex.test(elem.className);
+      }
+      
+      function removeClassName(elem,cname) {
+        var regex = new RegExp("\\s*\\b" + cname + "\\b","g");
+        elem.className = elem.className.replace( regex, "" );
+      }
+      
+      function addClassName(elem,cname) {
+        if (!hasClassName(elem,cname)) elem.className = elem.className + " " + cname;
+      }
+      
+      function toggleClassName(elem,cname) {
+        var regex = new RegExp("\\s*\\b" + cname + "\\b","g");
+        var classes = elem.className;
+        if (regex.test(classes)) {
+          elem.className = classes.replace( regex, "" );
+          return false;
+        }
+        else {
+          elem.className = classes + " " + cname;
+          return true;
+        }
+      }
+      
+      // ---------------------------------------------
+      // Reliable offset determination
+      // ---------------------------------------------
+      
+      function getWindowOffset(elem) {
+        var box;
+        if (elem.getBoundingClientRect) {
+          box = elem.getBoundingClientRect();
+        }
+        else if (elem.offsetParent && elem.offsetParent.getBoundingClientRect) {
+          // text node
+          box = elem.offsetParent.getBoundingClientRect();
+          box.top = box.top + elem.offsetTop;
+          box.left = box.left + elem.offsetLeft;
+        }
+        else {
+          box = { top: 0, left : 0 };
+        }
+        return box;
+      }
+      
+      // Return the viewport position: -1 (before), 0 (visible), 1 (after)
+      function viewportPosition(elem) {
+        var pos = getWindowOffset(elem)
+        if (pos.top < 0 || pos.left < 0) 
+          return -1;
+        else if (pos.top > (window.innerHeight || document.documentElement.clientHeight) ||
+                 pos.left > (window.innerWidth || document.documentElement.clientWidth)) 
+          return 1;
+        else 
+          return 0;
+      }
+      
+      // ---------------------------------------------
+      // Expand the toc sections and align headers with the toc.
+      // ---------------------------------------------
+      
+      var side = document.getElementsByClassName("sidepanel")[0];
+      var afterScroll = null;
+      
+      // Align a heading at the top of the page with the toc
+      function alignHeading( elem ) {
+        var ofs     = getWindowOffset(elem).top;
+        var sideofs = getWindowOffset(side).top;
+        if (ofs >= 0 && ofs < sideofs) {
+          window.scrollBy(0, ofs - sideofs);
+        } 
+      }
+      
+      // Expand, or unexpand, one toc item
+      // The class is 'auto-expands' or 'click-expands'; the latter is sticky
+      // as it is user induced and will not be automatically unexpanded.
+      function itemExpand(item,cls,expand) {
+        // get possible toc block (that follows the item)
+        var tocblock = item.nextElementSibling;
+        if (tocblock==null || !hasClassName(tocblock,"tocblock")) return;
+       
+        // set expand class
+        if (expand===undefined) expand = !hasClassName(tocblock,"expands");
+        if (cls===undefined) cls = "auto-expands" 
+        if (cls==="click-expands") removeClassName(tocblock,"auto-expands");
+        if (expand && !hasClassName(tocblock,cls)) {
+          toggleClassName(tocblock,cls); 
+        }
+        else if (!expand && hasClassName(tocblock,cls)) {
+          toggleClassName(tocblock,cls);
+          item.firstElementChild.className = "unexpanded";
+        }
+        
+        // set expansion icon
+        if (hasClassName(tocblock,"auto-expands") || hasClassName(tocblock,"click-expands")) {
+          item.firstElementChild.className = "expanded";   
+        }
+        else {
+          item.firstElementChild.className = "unexpanded";
+        }
+      }
+      
+      // Expand a single item in the toc (and unexpand others).
+      function itemExpandOne(item) {
+        // unexpand anything that was expanded
+        [].forEach.call( document.querySelectorAll(".tocitem"), function(item) {
+          removeClassName(item,"current");
+          itemExpand(item,"auto-expands",false);      
+        });
+        addClassName(item,"current");
+        // expand the chain of parent blocks
+        var tocblock = null;
+        var toc = item.nextElementSibling;
+        if (toc && hasClassName(toc,"tocblock")) { 
+          tocblock = toc;
+        }
+        else {
+          tocblock = item.parentElement;
+        }
+        while(tocblock != null && !hasClassName(tocblock,"toc")) {
+          if (hasClassName(tocblock,"tocblock")) {
+            item = tocblock.previousElementSibling;
+            if (item != null) itemExpand(item,"auto-expands",true);
+          }
+          tocblock = tocblock.parentElement;
+        }
+      }
+      
+      // Auto expand the toc at current  position in the document 
+      function expandToc() {
+        // find the first section heading that is visible in the viewport 
+        var current = null;
+        [].every.call( document.querySelectorAll(".tocitem"), function(item) {
+          var target = document.getElementById( item.getAttribute("data-toc-target") );
+          var pos = viewportPosition(target);
+          if (pos <= 0) current = item;
+          return (pos < 0);
+        });
+        // if found, expand the corresponding item
+        if (current != null) itemExpandOne(current);
+      }
+      
+      document.addEventListener("load", function(ev) { expandToc(); });
+      document.addEventListener("resize", function(ev) { expandToc(); });
+      
+      // fire at end of scrolling
+      var scrollHandler = null;
+      document.addEventListener("scroll", function(ev) {
+        if (scrollHandler) clearTimeout(scrollHandler);
+        scrollHandler = setTimeout( function() {
+          scrollHandler = null;
+          if (afterScroll) {
+            afterScroll();
+            afterScroll = null;
+          }
+          else {
+            expandToc();
+          }
+        }, 50 );
+      });
+      
+      // ---------------------------------------------
+      // Install event handlers for all items in the TOC
+      // ---------------------------------------------
+      [].forEach.call( document.querySelectorAll(".tocitem"), function(item) {
+        // only for toc items with a target
+        var target = document.getElementById( item.getAttribute("data-toc-target") );
+        if (!target) return;
+        
+        // ensure every tocblock has a expansion icon in front
+        // (the optional nested tocblock follows the item)
+        var tocblock = null;
+        var toc = item.nextElementSibling;  
+        if (toc && hasClassName(toc,"tocblock")) { 
+          tocblock = toc;
+          item.innerHTML = "<span class='unexpanded'></span>" + item.innerHTML;   
+        } 
+        
+        // on a click
+        item.addEventListener( "click", function() {
+          // expand this toc item and set expansion icon
+          itemExpand(item,"click-expands");
+          // after navigation, align the heading with the toc
+          afterScroll = (function() {
+            alignHeading(target);
+          });    
+        }); 
+      });
+</script>
+
+</html>

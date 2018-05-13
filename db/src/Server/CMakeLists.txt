@@ -1,7 +1,7 @@
 #生成可执行文件db
 list(APPEND SERVER_SOURCES main.cc)
 list(APPEND SERVER_SOURCES Server.cc)
-list(APPEND SERVER_SOURCES HTTPHandler.cc)
+list(APPEND SERVER_SOURCES HttpHandler.cc)
 list(APPEND SERVER_SOURCES RootRequestHandler.cc)
 list(APPEND SERVER_SOURCES PingRequestHandler.cc)
 list(APPEND SERVER_SOURCES NotFoundHandler.cc)
