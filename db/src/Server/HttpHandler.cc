@@ -28,14 +28,9 @@ void DataBase::HttpHandler::handleRequest(Poco::Net::HTTPServerRequest & request
 
         DataBase::HTMLForm params(request);
         processQuery(request,params,response);
-
-        response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_OK);
-        response.send();
         LOG_INFO(log, "Done processing query");
     } catch (...) {
-        /** If exception is received from remote server, then stack trace is embedded in message.
-         * If exception is thrown on local server, then stack trace is in separate field.
-         */
+        handleCurrentException();
     }
 }
 
@@ -50,7 +45,6 @@ void DataBase::HttpHandler::processQuery(Poco::Net::HTTPServerRequest & request,
     std::shared_ptr<IO::WriteBufferFromHTTPServerResponse> out
         = std::make_shared<IO::WriteBufferFromHTTPServerResponse>(response);
     DataBase::executeQuery(*in_param,*out);
-
     out->finalize();
 }
 

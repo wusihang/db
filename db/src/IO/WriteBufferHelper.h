@@ -25,6 +25,11 @@ inline void writeString(const std::string& s, WriteBuffer & buf) {
     buf.write(s.data(), s.size());
 }
 
+inline void writeString(const char * data, size_t size, WriteBuffer & buf)
+{
+    buf.write(data, size);
+}
+
 
 template <typename T>
 inline typename std::enable_if<std::is_integral<T>::value, void>::type

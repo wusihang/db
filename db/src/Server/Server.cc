@@ -10,6 +10,7 @@
 #include<CommonUtil/FileUtil.h>
 #include <CommonUtil/StringUtils.h>
 #include <CommonUtil/ConfigurationUtil.h>
+#include <Exception/ErrorHandler.h>
 #include<Poco/File.h>
 #include<Poco/Timespan.h>
 #include<Poco/DirectoryIterator.h>
@@ -28,6 +29,13 @@
 int DataBase::Server::main(const std::vector< std::string >& args)
 {
     Poco::Logger* log = &logger();
+    static ServerErrorHandler error_handler;
+    Poco::ErrorHandler::set(&error_handler);
+// 	try{
+// 	    throw Poco::Exception("111");
+// 	}catch(Poco::Exception& e){
+// 		Poco::ErrorHandler::handle(e);
+// 	}
     DataBase::registerFunctions();
     DataBase::registerAggregationFunctions();
 
@@ -103,10 +111,10 @@ int DataBase::Server::main(const std::vector< std::string >& args)
         http_params->setTimeout(60000);
         http_params->setKeepAliveTimeout(keep_alive_timeout);
         std::vector<std::unique_ptr<Poco::Net::TCPServer>> servers;
-		//多网卡时,需要确认是哪个ip作为服务器对外服务
-		//如果需要所有ip都生效,那么就可以使用0.0.0.0
-		//如果需要支持ipv6,那么可以使用::
-		//如果只允许本机访问,那么可以指定::1和127.0.0.1
+        //多网卡时,需要确认是哪个ip作为服务器对外服务
+        //如果需要所有ip都生效,那么就可以使用0.0.0.0
+        //如果需要支持ipv6,那么可以使用::
+        //如果只允许本机访问,那么可以指定::1和127.0.0.1
         std::vector<std::string> listen_hosts = ConfigurationUtil::getMultipleValuesFromConfig(config(),"","listen_host");
         bool try_listen = false;
         if (listen_hosts.empty()) {

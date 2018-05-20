@@ -1,4 +1,5 @@
 #pragma once
+
 #include<string>
 #include<type_traits>
 #include<Poco/Exception.h>
@@ -94,5 +95,78 @@ inline T parse(const std::string & s)
 }
 
 
+template <typename T>
+static void appendToStringOrVector(T & s, const char * begin, const char * end)
+{
+    s.append(begin, end - begin);
+}
+
+template <typename Vector>
+void readStringUntilEOFInto(Vector & s, ReadBuffer & buf)
+{
+    while (!buf.eof())
+    {
+        size_t bytes = buf.buffer().end() - buf.position();
+
+        appendToStringOrVector(s, buf.position(), buf.position() + bytes);
+        buf.position() += bytes;
+
+        if (buf.hasPendingData())
+            return;
+    }
+}
+
+void readStringUntilEOF(std::string & s, ReadBuffer & buf);
+
+template <typename T>
+inline void readPODBinary(T & x, ReadBuffer & buf)
+{
+    buf.readStrict(reinterpret_cast<char *>(&x), sizeof(x));
+}
+
+inline char parseEscapeSequence(char c)
+{
+    switch(c)
+    {
+    case 'a':
+        return '\a';
+    case 'b':
+        return '\b';
+    case 'f':
+        return '\f';
+    case 'n':
+        return '\n';
+    case 'r':
+        return '\r';
+    case 't':
+        return '\t';
+    case 'v':
+        return '\v';
+    case '0':
+        return '\0';
+    default:
+        return c;
+    }
+}
+
+
+template <bool enable_sql_style_quoting, typename Vector>
+void readQuotedStringInto(Vector & s, ReadBuffer & buf);
+
+
+template <bool enable_sql_style_quoting, typename Vector>
+void readBackQuotedStringInto(Vector & s, ReadBuffer & buf);
+
+void readBackQuotedStringWithSQLStyle(std::string & s, ReadBuffer & buf);
+
+
+// void readQuotedString(std::string & s, ReadBuffer & buf);
+// void readQuotedStringWithSQLStyle(std::string & s, ReadBuffer & buf);
+
+template <bool enable_sql_style_quoting, typename Vector>
+void readDoubleQuotedStringInto(Vector & s, ReadBuffer & buf);
+
+// void readDoubleQuotedString(std::string & s, ReadBuffer & buf);
+void readDoubleQuotedStringWithSQLStyle(std::string & s, ReadBuffer & buf);
 
 }

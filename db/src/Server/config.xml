@@ -9,7 +9,7 @@
     </logger>
     <http_port>8123</http_port>
 	
-	<pid>/home/wusihang/db/pid/pid.pid</pid>
+<!-- 	<pid>/home/wusihang/db/pid/pid.pid</pid> -->
 	
 	<path>/home/wusihang/db/path/</path>
 	

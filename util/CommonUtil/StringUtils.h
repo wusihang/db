@@ -26,4 +26,31 @@ inline bool endsWith(const std::string& s, const char* suffix) {
     return detail::endsWith(s, suffix, strlen(suffix));
 }
 
+inline bool isWhitespaceASCII(char c)
+{
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\v';
+}
+
+
+inline bool isAlphaASCII(char c)
+{
+    return (c >= 'a' && c <= 'z')
+           || (c >= 'A' && c <= 'Z');
+}
+
+inline bool isNumericASCII(char c)
+{
+    return (c >= '0' && c <= '9');
+}
+
+inline bool isWordCharASCII(char c)
+{
+    return c == '_' || isAlphaASCII(c) || isNumericASCII(c);
+}
+
+inline bool isHexDigit(char c) {
+    return (c>='a'&&c<='f') || (c>='A'&&c<='Z') || isNumericASCII(c);
+}
+
+
 }

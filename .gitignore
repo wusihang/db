@@ -3,3 +3,5 @@ db.kdev4
 .kdev4/
 #ignore application build directories
 build/
+#ignore debug directories
+debug/
