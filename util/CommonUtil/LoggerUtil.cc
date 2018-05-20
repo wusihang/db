@@ -2,7 +2,7 @@
 #include<Poco/Exception.h>
 #include<Poco/ErrorHandler.h>
 
-void handleCurrentException()
+void currentExceptionLog()
 {
     try {
         throw;

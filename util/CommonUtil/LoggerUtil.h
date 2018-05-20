@@ -61,4 +61,4 @@ using Poco::Logger;
     oss_internal_rare << message; \
     (logger)->fatal(oss_internal_rare.str());}} while(false)
     
-void handleCurrentException();
+void currentExceptionLog();

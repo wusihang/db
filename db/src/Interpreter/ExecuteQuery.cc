@@ -26,6 +26,7 @@ void DataBase::executeQuery(IO::ReadBuffer& ibuf, IO::WriteBuffer& wbuf)
             wbuf.write(begin, (end - begin));
         }
     } catch(...) {
-		handleCurrentException();
+		currentExceptionLog();
+		throw;
     }
 }
