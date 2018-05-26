@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <meta name="generator" content="Madoko, version 1.1.6" />
+  <meta name="viewport" content="initial-scale=1.0" />
+  <meta name="author" content="" />
+  <meta name="description" content="Provides popup anchor links to headings in a web page.
+     This makes it easier for others to link to specific sections
+     in a large web manual or book." />
+  <title>3、词法分析</title>
+  <style type="text/css"  class="link">
+  /*# sourceURL=madoko.css */
+  
+  .madoko .toc>.tocblock .tocblock .tocblock {
+    margin-left: 2.25em;
+  }
+  .madoko .toc>.tocblock .tocblock {
+    margin-left: 1.5em;
+  }
+  .madoko .toc-contents>.tocblock>.tocitem {
+    font-weight: bold;
+  }
+  .madoko .toc {
+    margin-top: 1em;
+  }
+  .madoko p.para-continue {
+    margin-bottom: 0pt;
+  }
+  .madoko .para-block+p {
+    margin-top: 0pt;
+  }
+  .madoko ul.para-block, .madoko ol.para-block {
+    margin-top: 0pt;
+    margin-bottom: 0pt;
+  }
+  .madoko ul.para-end, .madoko ol.para-end {
+    margin-bottom: 1em;
+  }
+  .madoko dl {
+    margin-left: 0em;
+  }
+  .madoko blockquote {
+    font-style: italic;
+  }
+  .madoko a.localref {
+    text-decoration: none;
+  }
+  .madoko a.localref:hover {
+    text-decoration: underline;
+  }
+  .madoko .footnotes {
+    font-size: smaller;
+    margin-top: 2em;
+  }
+  .madoko .footnotes hr {
+    width: 50%;
+    text-align: left;
+  }
+  .madoko .footnote { 
+    margin-left: 1em;
+  }
+  .madoko .footnote-before {
+    margin-left: -1em;
+    width: 1em;
+    display: inline-block;
+  }
+  .madoko .align-center, .madoko .align-center>p {
+    text-align: center !important;
+  }
+  .madoko .align-center pre {
+    text-align: left;
+  }
+  .madoko .align-center>* {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .madoko .align-left, .madoko .align-left>p {
+    text-align: left !important;
+  }
+  .madoko .align-left>* {
+    margin-left: 0pt !important;
+    margin-right: auto !important;
+  }
+  .madoko .align-right, .madoko .align-right>p {
+    text-align: right !important;
+  }
+  .madoko .align-right>* {
+    margin-left: auto !important;
+    margin-right: 0pt !important;
+  }
+  .madoko .align-center>table,
+  .madoko .align-left>table,
+  .madoko .align-right>table {
+    text-align: left !important;
+  }
+  .madoko .equation-before {
+    float: right;
+  }
+  .madoko .bibitem {
+    font-size: smaller;
+  }
+  .madoko .bibsearch {
+    font-size: x-small;
+    text-decoration:none;
+    color: black;
+    font-family: "Segoe UI Symbol", Symbola, serif;
+  }
+  .madoko .block, .madoko .figure, .madoko .bibitem, .madoko .equation, .madoko div.math {
+    margin-top: 1ex;
+    margin-bottom: 1ex;
+  }
+  .madoko .figure {
+    padding: 0.5em;
+    margin-left: 0pt;
+    margin-right: 0pt;
+  }
+  .madoko .hidden {
+    display: none;
+  }
+  .madoko .invisible {
+    visibility: hidden;
+  }
+  .madoko.preview .invisible {
+    visibility: visible;
+    opacity: 0.5;
+  }
+  .madoko code.code, .madoko span.code {
+    white-space: pre-wrap;
+  }
+  .madoko hr, hr.madoko {
+    border: none;
+    border-bottom: black solid 1px;
+    margin-bottom: 0.5ex;
+  }
+  .madoko .framed>*:first-child {
+    margin-top: 0pt;
+  }
+  .madoko .framed>*:last-child {
+    margin-bottom: 0pt;
+  }
+  .madoko ul.list-style-type-dash {
+      list-style-type: none !important;
+  }
+  .madoko ul.list-style-type-dash > li:before {
+      content: "\2013"; 
+      position: absolute;
+      margin-left: -1em; 
+  }
+  .madoko table.madoko {
+    border-collapse: collapse;
+  }
+  .madoko td, .madoko th {
+    padding: 0ex 0.5ex;
+    margin: 0pt;
+    vertical-align: top;
+  }
+  .madoko .cell-border-left {
+    border-left: 1px solid black;
+  }
+  .madoko .cell-border-right {
+    border-right: 1px solid black;
+  }
+  .madoko thead>tr:first-child>.cell-line,
+  .madoko tbody:first-child>tr:first-child>.cell-line {
+    border-top: 1px solid black;
+    border-bottom: none;
+  }
+  .madoko .cell-line, .madoko .cell-double-line {
+    border-bottom: 1px solid black;
+    border-top: none;
+  }
+  .madoko .cell-double-line {
+    border-top: 1px solid black;
+    padding-top: 1.5px !important;
+  }
+  .madoko .input-mathpre .MathJax_Display {
+    text-align: left !important;
+  }
+  .madoko div.input-mathpre {
+    text-align: left;
+    margin-top: 1.5ex;
+    margin-bottom: 1ex;
+  }
+  .madoko .math-rendering {
+    text-align: left;
+    white-space: pre;
+    color: gray;
+  }
+  .madoko .mathdisplay {
+    text-align: center;
+  }
+  .madoko .pretty table {
+    border-collapse: collapse;
+  }
+  .madoko .pretty td {
+    padding: 0em;
+  }
+  .madoko .pretty td.empty {
+    min-width: 1.5ex;
+  }
+  .madoko .pretty td.expander {
+    width: 100em;
+  }
+  body.madoko, .madoko .serif {
+    font-family: Cambria,"Times New Roman","Liberation Serif","Times",serif;
+  }
+  .madoko .sans-serif {
+    font-family: "Calibri", "Optima", sans-serif;
+  }
+  .madoko .symbol {
+    font-family: "Segoe UI Symbol", Symbola, serif;
+  }
+  body.madoko {  
+    -webkit-text-size-adjust: 100%;       
+    text-rendering: optimizeLegibility;
+  }
+  body.madoko {
+    max-width: 88ex; 
+    margin: 1em auto;
+    padding: 0em 2em;  
+  }
+  body.preview.madoko {
+    padding: 0em 1em;
+  }
+  .madoko p {
+    text-align: justify;
+  }
+  .madoko h1, .madoko h2, .madoko h3, .madoko h4 { 
+    margin-top: 1.22em; 
+    margin-bottom: 1ex;
+  }
+  .madoko h1+p, .madoko h2+p, .madoko h3+p, .madoko h4+p, .madoko h5+p  { 
+    margin-top: 1ex;    
+  }
+  .madoko h5, .madoko h6 { 
+    margin-top: 1ex;
+    font-size: 1em;
+  }
+  .madoko h5 { 
+    margin-bottom: 0.5ex;
+  }
+  .madoko h5 + p {
+    margin-top: 0.5ex;
+  }
+  .madoko h6 { 
+    margin-bottom: 0pt;
+  }
+  .madoko h6 + p {
+    margin-top: 0pt;
+  }
+  .madoko pre, .madoko code, .madoko kbd, .madoko samp, .madoko tt, 
+  .madoko .monospace, .madoko .token-indent, .madoko .reveal pre, .madoko .reveal code, .madoko .email {
+    font-family: Consolas,"Andale Mono WT","Andale Mono",Lucida Console,Monaco,monospace,monospace;
+    font-size: 0.85em;
+  }
+  .madoko pre code, .madoko .token-indent {
+    font-size: 0.95em;
+  }
+  .madoko pre code {
+    font-family: inherit !important;
+  }
+  .madoko ol.linenums li {
+    background-color: white;
+    list-style-type: decimal;
+  }
+  .madoko .remote {
+    background-color: #F0FFF0;
+  }
+  .madoko .remote + * {
+    margin-top: 0pt;
+  }
+  @media print {
+    body.madoko {
+      font-size: 10pt;
+    }
+    @page {
+      margin: 1in 1.5in;
+    }
+  }
+  @media only screen and (max-device-width:1024px) {
+    body.madoko {
+      padding: 0em 0.5em;    
+    }
+    .madoko li {
+      text-align: left;
+    }
+  }
+  
+    </style>
+  
+  <style>
+    /* ---------------------------------------------
+          Center document in the viewport
+        ----------------------------------------------*/
+        body.madoko {
+          margin: 0pt;
+          padding: 0pt;
+          max-width: 100%;
+        }
+        .body {
+          width: 70em;
+          max-width: 90%;
+          margin: 1em auto;
+        }
+        .preview .body {
+          width: 98%;
+          max-width: 100%;
+          margin: 0.25em auto;
+        }
+        
+        /* -----------------------------------------
+           Settings for a wide viewport:
+           The contents are shown in the side panel
+           on the left side.
+        -------------------------------------------- */
+        @media (min-width: 1024px) {
+          body.madoko {
+            padding-right: 8%; /* looks more balanced with sidepanel */
+          }       
+          .sidepanel {
+            width   : 14rem ; 
+            position: fixed;
+            top     : 3rem ;
+            max-height: 90%;
+            overflow-y: auto;
+          }
+          .mainpanel, .footnotes, .titleblock {
+            margin-left: calc(14rem + 4rem + 2px + 1rem);
+          }
+          .tocblock2, .tocblock3 {
+            display:none;
+          }
+          .tocblock.auto-expands, .tocblock.click-expands {
+            display:block;
+          }     
+          /*
+          .tocitem.current::after {
+            content: "\00A0\25CF";
+          }
+          */
+          .tocitem.current .heading-label {
+            font-weight: bold;
+          }      
+          span.unexpanded, span.expanded {
+            display: inline-block;
+            width: 1.25em;
+            margin-left: -1.25em;
+            font-family: "Segoe UI Symbol", Symbola, serif;
+            font-size: 70%;
+            cursor: pointer;
+            vertical-align: 0.1em;
+          }
+          span.unexpanded::before {
+            content: "\25B6";
+          }
+          span.expanded::before {
+            content: "\25BC";
+          }
+        }
+        
+        /* ---------------------------------------------------
+           Set margins and padding for side panel and sections
+        ------------------------------------------------------ */
+        .sidepanel, .mainpanel section, .footnotes {
+          padding: 0pt 1rem 0.25rem 1rem;
+        }
+        .sidepanel .tocblock {
+          font-size  : small;
+          white-space: nowrap;
+        }
+        .sidepanel .toc, .sidepanel h2, .sidepanel h1 {
+          margin-top: 0pt;
+        }
+        .footnotes {
+          padding-top: 0.5em; 
+        }
+        .footnotes>hr {
+          display:none;
+        }
+        section,.sidepanel {
+          margin-bottom: 1em;
+        }
+        
+        /* -----------------------------------
+           Nice scrollbar for toc
+        ----------------------------------- */
+        .sidepanel::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }     
+        /* Track */
+        .sidepanel::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 4px rgba(0,0,0,0.3); 
+            -webkit-border-radius: 6px;
+            border-radius: 6px;
+        }    
+        /* Handle */
+        .sidepanel::-webkit-scrollbar-thumb {
+            -webkit-border-radius: 6px;
+            border-radius: 6px;
+            background: lightgray; 
+            -webkit-box-shadow: inset 0 0 4px rgba(0,0,0,0.5); 
+        }
+        .sidepanel::-webkit-scrollbar-thumb:window-inactive {
+          background: gainsboro; 
+        }
+        .madoko .toc > .tocblock .tocblock .tocblock {
+          margin-left: 1.5em;
+        }
+        .madoko .toc a {
+          color: #444; 
+        }
+    h0:hover .entity-anchor,
+        h1:hover .entity-anchor,
+        h2:hover .entity-anchor,
+        h3:hover .entity-anchor {
+          display: inline-block;
+        }
+        
+        a.entity-anchor {
+          color: black;
+        }
+        
+        a.localref.entity-anchor:hover {
+          text-decoration: none;
+        }
+        
+        .entity-anchor {
+          display: none;
+          width: 0.8em;
+          margin-left: -0.8em;
+          font-family: "Segoe UI Symbol", Symbola, serif;
+          font-size: 80%;
+        }
+  </style>
+  </head>
+<body class="madoko">
+
+<div class="body madoko" style="line-adjust:0">
+
+<div class="titleblock align-center para-block" style="text-align:center;line-adjust:0">
+<div class="titleheader align-center" style="text-align:center;line-adjust:0">
+<div class="title para-block" style="font-size:xx-large;font-weight:bold;margin-bottom:0.5ex;line-adjust:0">3、词法分析</div></div>
+<div class="authors align-center" style="text-align:center;width:80%;line-adjust:0"><table class="authorrow columns block" style="margin-top:2ex;width:100%;line-adjust:0">
+<tbody><tr><td class="author column" style="text-align:center;line-adjust:0">
+<div class="authoremail email" style="line-adjust:0">wusihang9@139.com</div></td></tr></tbody></table></div></div>
+<div class="sidepanel"><span data-line=""></span>
+<nav class="toc toc-contents">
+<div class="tocblock tocblock1">
+<div class="tocitem tocitem1" data-toc-target-elem="h1" data-toc-target="sec-intro" data-toc-depth="1" data-toc-line="[1]{.heading-label}.&#8194;\u5B9A\u4E49Token\u548C\u8BCD\u6CD5\u5206\u6790\u5668Lexer" style="toctarget:sec-intro"><a href="#sec-intro" class="localref"><span class="heading-label">1</span>.&#8194;定义Token和词法分析器Lexer</a></div>
+<div class="tocblock tocblock2">
+<div class="tocitem tocitem2" data-toc-target-elem="h2" data-toc-target="section" data-toc-depth="2" data-toc-line="[1.1]{.heading-label}.&#8194;\u8BCD\u6CD5\u5206\u6790" style="toctarget:section"><a href="#section" class="localref"><span class="heading-label">1.1</span>.&#8194;词法分析</a></div>
+<div class="tocitem tocitem2" data-toc-target-elem="h2" data-toc-target="sec-token" data-toc-depth="2" data-toc-line="[1.2]{.heading-label}.&#8194;Token\u8FED\u4EE3" style="toctarget:sec-token"><a href="#sec-token" class="localref"><span class="heading-label">1.2</span>.&#8194;Token迭代</a></div></div>
+<div class="tocitem tocitem1" data-toc-target-elem="h1" data-toc-target="section" data-toc-depth="1" data-toc-line="[2]{.heading-label}.&#8194;\u5B9A\u4E49\u8BED\u6CD5\u89E3\u6790" style="toctarget:section"><a href="#section" class="localref"><span class="heading-label">2</span>.&#8194;定义语法解析</a></div>
+<div class="tocblock tocblock2">
+<div class="tocitem tocitem2" data-toc-target-elem="h2" data-toc-target="section" data-toc-depth="2" data-toc-line="[2.1]{.heading-label}.&#8194;\u5B9A\u4E49\u62BD\u8C61\u8BED\u6CD5\u6811" style="toctarget:section"><a href="#section" class="localref"><span class="heading-label">2.1</span>.&#8194;定义抽象语法树</a></div>
+<div class="tocitem tocitem2" data-toc-target-elem="h2" data-toc-target="section" data-toc-depth="2" data-toc-line="[2.2]{.heading-label}.&#8194;\u5B9A\u4E49\u89E3\u6790\u5668" style="toctarget:section"><a href="#section" class="localref"><span class="heading-label">2.2</span>.&#8194;定义解析器</a></div></div>
+<div class="tocitem tocitem1" data-toc-target-elem="h1" data-toc-target="sec-executequerycc" data-toc-depth="1" data-toc-line="[3]{.heading-label}.&#8194;\u56DE\u5230ExecuteQuery.cc" style="toctarget:sec-executequerycc"><a href="#sec-executequerycc" class="localref"><span class="heading-label">3</span>.&#8194;回到ExecuteQuery.cc</a></div>
+<div class="tocitem tocitem1" data-toc-target-elem="h1" data-toc-target="section" data-toc-depth="1" data-toc-line="[4]{.heading-label}.&#8194;\u5176\u4ED6\u8BF4\u660E" style="toctarget:section"><a href="#section" class="localref"><span class="heading-label">4</span>.&#8194;其他说明</a></div></div></nav></div>
+<div class="mainpanel">
+<h2 id="sec-intro" class="h1" data-heading-depth="1" style="display:block"><a href="#sec-intro" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">1</span>.&#8194;</span>定义Token和词法分析器Lexer</h2><h3 id="section" class="h2" data-heading-depth="2" style="display:block"><a href="#section" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">1.1</span>.&#8194;</span>词法分析</h3>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>  在Parser/Lexer.h中定义了枚举TokenType，用于描述标识符，常量等等；
+  类Token包含两个字符指针，用于表达字符串，还有一个TokenType用于标识Token类型
+  类Lexer传入一个字符串，nextToken用于逐个分析下一个Token，以下是Token分析片段</code></pre>
+<div class="framed" style="border:solid black 1px">
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>   ......
+  //开头如果是字符,那么必须以 下划线或字母开头,中间可以包含数字
+    case &#39;a&#39;...&#39;z&#39;:
+    case &#39;A&#39;...&#39;Z&#39;:
+    case &#39;_&#39;:
+    {
+        ++pos;
+        while (pos &lt; end &amp;&amp; StringUtils::isWordCharASCII(*pos))
+            ++pos;
+        return Token(TokenType::BareWord, token_begin, pos);
+    }
+    
+    ......
+    
+ case &#39;(&#39;:
+        return Token(TokenType::OpeningRoundBracket, token_begin, ++pos);
+    case &#39;)&#39;:
+        return Token(TokenType::ClosingRoundBracket, token_begin, ++pos);
+    case &#39;[&#39;:
+        return Token(TokenType::OpeningSquareBracket, token_begin, ++pos);
+    case &#39;]&#39;:
+        return Token(TokenType::ClosingSquareBracket, token_begin, ++pos);
+    case &#39;,&#39;:
+        return Token(TokenType::Comma, token_begin, ++pos);
+    case &#39;;&#39;:
+        return Token(TokenType::Semicolon, token_begin, ++pos);
+   ......</code></pre></div><h3 id="sec-token" class="h2" data-heading-depth="2" style="display:block"><a href="#sec-token" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">1.2</span>.&#8194;</span>Token迭代</h3>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>定于位于Parser/TokenIterator.h
+
+类Tokens使用字符串构造，Lexer词法分析器作为其成员并使用传入的字符串构造
+该类重载了[]操作符，用于类数组操作，当使用操作时，如果token已经解析，
+那么直接返回，如果token未解析，那么解析并加入已解析列表datas里，解析过程忽略注释
+具体方法如下,注释已经很详尽，不再说明：</code></pre>
+<div class="framed" style="border:solid black 1px">
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>    //重载[]操作符, 用于获取token列表中对应的token,如果token列表中不存在,
+    //那么尝试解析下一个token
+    //获取指定index的token时,如果token还未在列表中,
+    //那么使用词法分析分析下一个token,并加入列表
+    const Token&amp; operator[](size_t index) {
+        while (true)
+        {
+            //如果index小于当前已有的token,那么表示token已经解析过,就直接取出
+            if (index &lt; data.size())
+                return data[index];
+
+            //如果当前已解析token不为空,并且最后一个token是EndOfStream,
+            //那么就直接取出最后一个结束标记的token
+            if (!data.empty() &amp;&amp; data.back().isEnd())
+                return data.back();
+
+            //非以上两种情况时,使用词法分析器分析下一个token
+            Token token = lexer.nextToken();
+            //如果token是非注释,非空白字符,那么就将token加入到token列表中
+            if (token.isSignificant())
+                data.emplace_back(token);
+        }
+    }</code></pre></div>
+<p class="p noindent">TokenIterator主要是重载了前置++和&#8211;，使得Tokens具有迭代能力
+</p><h2 id="section" class="h1" data-heading-depth="1" style="display:block"><a href="#section" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">2</span>.&#8194;</span>定义语法解析</h2><h3 id="section" class="h2" data-heading-depth="2" style="display:block"><a href="#section" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">2.1</span>.&#8194;</span>定义抽象语法树</h3>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>抽象语法树定义在Parser/IAST.h中，是树形结构，并且定义了一些virtual函数，子类继承时,
+必须重写这些函数。</code></pre><h3 id="section" class="h2" data-heading-depth="2" style="display:block"><a href="#section" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">2.2</span>.&#8194;</span>定义解析器</h3>
+<p class="p noindent">基本继承关系如下图所示：
+</p>
+<p class="p indent"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANsAAAETCAYAAAC/T3MtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAFY2SURBVHhe7Z0HVBTZvu5555x73rnr3bXueve+t967b3CQnDMqiCgoiphFUUF0xJyzjhhGccxZGXXUMYdjQDEHzIBEFUUl55xjE5vu7+1dXY1NJ2Ekd/3W2quru2JX1Vf/vav2V381KOHuLX92iIODo6XU8gWIKarF7x9L4XgtGTHvoxAdFQ5ObBwcbYyM2N4RsUVyYuPgaHPaVWwtmS6/Mg5+r52x4IYaUxb6q2HbUzMkFwexU3Bw9Aw6XWw7Hjkjs+4S0klJrTmLRN4JxFbux6Hn7uwUHBw9g04X24gDaniZvQr3k+fgdsJ03IzzwO1ED4w81HwTUoprsPjKR9jufMWUEUfCEJ9XyY7l4Oj6SIvtIxHb+45ss9n7quG30CHY9awvfB+bYu2dXlh4/V/huPtvmD9/Pry9vZnpZp8IwuaYBqx/X4+VkXVY+KYWm29EMuM4OLoDnS420zV/hdtvf8HYI3/FeL+/Yfxv/4KJx/5Ofv8LM37RokWYN28edJdcxMh7JXC6loe+57OhcSwH+gv/YKaRS9ULzNC3xi/RtQDvDZZb/AANdVHRNhkIz/VX8LlKwE7MwdH+yIotkogt7M+L7dnTpwh88pj9JuLhgwd4+eIF+605thvUMdHv3zH6wL9hDCn0cwL57rC5NzNeHNl+mLoX/7UnHv+57SP+g5T/tTOO/LaHGScXSbExwxZY8yoXpcV5SH17AxucNGA2/xnKhOz0HBztjIzY3hKxRXyH2O7cDoCOZm+8jYpivkeEhzPfH9y/z3yX5lbEJQzeYoje8//RVPqu08DtqEvM+JkzZzKf2j/txr/veYf/ueMtU+iwzRI/ZpxcZMTGDjMIUOQ/Gjp9t+JTHVDzdhOc9UVRT99+Jk7GVIFqsC72KLwdTaBFI6LmMByKzUfYvimw7U2n1YDtgkcoocGxIRuPfd0xgC5Dsy+mHQxHKf29sQCBPqNhqytatuWcQE7cKkybi42yc/t2WFmYIyw0FJZmpti7ezc7pvVVULHYLgV/hOGiffiXUauY8uPM7bge9oUZJxeFYmsEL+s1Do7Vgq67P/KJKBorUhGfVojSonj4LzCFzpgryG0ks738CcZWqxCYWoiCrAwUJP4OF91hOBpdjOrKPCQll5Gl8ZF6cgQMbJbA/3MuMkP2YpSuNTa+rSYiTILfIC2MOv0J+UW5SM+uIjLnUFXaRWyNjY2YTap/9Go+d/YsCAR//hQTi63VSItNUxRdREUdNuM34n5WAzvxV3ihi2HVbyM+0NmI2EzsdyGuXjSuMecyxmlbYMm1WFQQMTLw03BisCZcz2US2VHK8NhDH477E9DAiE0XHoHcXVOOdhIbhVdVhX179qC6mlzhv4M2E5u+GZbei0VaZh5Ka8VKofCR/2w7vAYYQpsIUVubiNFqPaJrZMUG1CPz4XZMt9OEltVE/Ho/A/W177HRSlLIotLH5y1qOLFxSNBuYmsrxGJrrPqMguAhyLj535iSff+/UFf2nhknFxmxiauRUlRHYI2FAbzOx6KSL0RlyHL06atIbCyCSnw+Nw2m2m64mZOEY046cLteIFtF5MTGIYG02D68jcC7iNCuIzbx3cjkm0MgxB4IhfsgFOwmw1uR9nQOM04uLRZbOFYyYotBEa8WpcEr0FeB2ARVKYiKTkdJVSXyQ7fBQdMF57NqkHx0GPT7LMLliFTkFeQgKZosi9YpObFxSCAjtigitvA2EltbiJJGNvpwO/IXNTRWL0B9sSfqCkaCn6+BV+v/zk4lh5aKDQ3IvLUaI03FVUAd9J18DIlEYNJia0g+BU8LddF0OnaYfjAcZTScNWThoa877GgVlIzTd1iGwGIyghMbhwRdXmxi7nr/BbXx/xsV7/+Bind/Q82Xf8Ud77+yYzk4uj7dRmw3p/0fFAX/dxQH/YMpdPjuYkN2LAdH16fbiC319WX4zzHFCce/MOXaVC1khF5nx3JwdH26hNjaUpQcHF0VWbGFE7G96Xpi+/nEG4zf8gjjNz+CGy2/PMbKE6HsWA6Oro+02Oj7R952RbG5rryCg0/KcOBhIQ49LoLf0zKMWn+bEd/4LYGYQArzuZUU30BMJJ8TfZ9i9SlRH00Ojs5GRmyRRGxhXVBsDrOOYEdABibte4cp+6LhczEeewLSsYv8tpOU7bfSsO1mBnyvp2LztTRs+mcKNl3LhOvam+wSlMBPwznvubiSKepw1URNFNY5eOD779zX4MtvM7Ho93eoENBO0BMwdGsM6gRlCNs9ExsCCyHZp4WjZ9IlxNYSzMevx88XYuH2axDctwfBbVsQxm5+if4LL8J8qh9MPf1gRgsZpp/GHn4YtfoK/qv/LHYJimlIPAAXh1/woYZ8YQTmht+OH0FgaphIbMUZ8N92GKFMV35AUHgfy4YPhNMgqTLQDlYa9FmbKy7nNJePoCwMuyZ44nRqHSu2jygK34QxU4/iUxVnBVAFuo3YejvMgOvys9CfsAdG7ntJ2QetUZux5OAdvEjh4VlSlUSh3ysRnFaN1yRaPYhMYpciB2E5glY4wP1MMjLuboLvtdtY5TAZly/NxJiNZ7DcYQr8H66G46jjSJUKfGKEdXl4H3AQK91dMG7uLgTElLCdkgn8dFyePxLDhw1tKs7WP0LD0B4uEr+5um/D++/rRsrRxek0sbXWZDrR5yzCsusQmFiBZ8mVTHlKhHX/cwkO3EnGLv9E7CZlD1vo8P7bSThwPwujvX3YpchS83E7BltNhd+lA5huOx5nYkOZaPY4NxHBQfewkgjvZmQgWS+P8bgJeSkIuhfA+PbuvYhFcWUhwjfawWa6H14kJOH5+RtIqq1B4u2LCC2i0a0RNeUlKCkuRNrrI5hhZ49p3v0x0Ocpwq+fxv1PuSguLkZJaSX4XIDr0ciKLYyILaT9xdZak+mEjdew93Yadl5PYMoOtuy6kYidtxKxj5Q9pOxmP8Xl8IMcjJm1iV2KLHXxZ7Bx9XJMMdeA066PqKlmq5E7J8Le0gia6j/A2NIK9hP8EF9Pq4NRuLB3O3asdYP1oLU4uNQNzqY/QMtmKDzIBcF36BCs8/WC4+iteMV0kOSjPP4xji1zhY3tNBwNL0IerUZuCUb4qTkYaGAL7/2ByKjllNbT6TSxUVpjMnXbcB377xCxkYhFC41cO9hhWugwjWiSv9Gy/142xsxULDYqhtybs+Aw/hjiyQkvrI4UtdMqavF5hx1pf/XD5peFX6uFLLUff8GQUQdwM+AKDnmaw27JCdy48xCXvQzRd9kdZNSx4mlIw+WFnlh59BkyauhvApRGnMWZ13SZQtRmPsbuyXYYcyQB0uYCjp5Fp4qtNSbT8euvY3dAKraRaLadlF/Fn9cSmn6jn+Lf6fA2Mm7vnSyM8N7ILkUaISojtsCxlwYGTZyAkUMm43BUMCO2h/HX4T3AGY4GpnCx7wvPwxGiTscMAuRfc4PD0tt4cf86/LzMYb/sD9y6H4LoC+PQb+5zlCsKVI25uDxuEHw/SnaKFkLABbYej7TYqJctKrSDxEZpqcl0nM81EqlSsOWf8fBly1aJT/q7uIh/p2XnrQy4/rSBXYosdckBOHHqOp5HZ4LXSE56XiR+tnfBmmlOmHXhDlYT4T1KDYaf71WkikMPPwuXx1vDY+tiuLu6wMnoB2haOmGk61gs2r8doy1IOy9fdDey7vMejDTVh5EBW/S1mItLb12J32gxH4vfk2Sd4xw9h04XW0thItutdBLJkpiyg5TtpOxkP7exn/R3Oiz6JNXNO9kY+ZOiyCYALz0cDy4ewa/LvTCqnwXcj/ljlcMU3EvPJxcCec/Z+Mi7Oxd9B2zB+8pa8HjFiNjkgFG/J6CCx0NNXRGezDFD//VhqJSKVo2lEfCbaEoi4n6sHDwA889Eo4x7wKYydBux2c07Bce19zFo9e2mMpAUR3ZY/Cldhqx/An3nuexSpGlE7sUR6K1ugpHzduBaZB7qmBskrMAE1chNSkdlkyCEqIrcDCdDF+x7X0mqflRNdfi01RFjzojfQULv9p/DJAMrrHpZSqapQ1H8a1zdPRfDDHTgvCYAGSRCNhaHwm96P5jaTcLaA1fw9H0aSuu5umRPpkuIrSXTTdl8EztvpjHRajspO9hP+l36t1/ZT/r7nttZGDfbl12KLILqQhTXSLQV677Az8NJ9oH1EE8cT6iHsCoZEXEVJCbykXHBE/YWpjDStMaKV+XMowERjSiOeoQPpY2oDP8FLn2d4LF8H26+L5K60dKAgrc3cHDFFLj0n4CTyVw1sicjK7ZQIrbgrie2jadewPdqCjZdTMAvlxKwkXyuI0X8nSlk2IeU9eLfLpJ227V0+B65yi6Fg6Pz6DZie/o6Ar/sPIZNO45iwzY/rP/VDz5bD+PnLYewdvNBUg4ww/Q3Oo5OQ6el8wS+5nICcHQ+MmILJ2J70wXFxsHR3ZEWGzWORnZVsbVkOi65IkdXpceJjUuuyNFV6XFi45IrcnRVmostiXklQuSboO7bZuOSK3J0VXqc2FQuuSIvHD/baTRti5axAzw2+iOJ6fTM0ZXo8mLjkit+A2ZbrOATlI/Sogx8eeaHaUY/YNDuL5yLoIshI7YwIraQLiQ2LrniN5IrVpJtMeiLrTHibanFh01W0J34AGXkm7D0GZbaaooin8FgrLiaCrKJEFbF4I/ZA2BAf+9lBq+LGUzvlsbiYBycMRCm5HdNi3HYGpgv1euF48/S5cVG4ZIrKkmuSLdFQmwN+S+wxV4LzgdZfxy/FIlxGSguy8eHU5NgpP8TnpYLUHx7AgzttiA4nwdeUQqSihoYMd+ZZgCzaafxLisH0ac8YGI8G8+4dKltgrTY6CsRIrqa2LjkikqSK9Jt0SLb0FsLeuJtsliAe7ly4lHZQ0zRd8LxlAaUBc6AsZEnTr392l9TUBQAdx077PrCbiCT4ccSayPpm5A4vhdZsYV0PbFRuOSKCpIr0m0xsMK6lyRS5uciIzYYl1bYQbf/Zmad9ekB2DC+L4x+JMvRol66QThKOzzzCxF8ZA6c9dRhNmI1riVUoyHZD4Ol1kuz+sx6yT0SaQu6jdjaCrHYekxyRUZskm02OtlhOGkOxdnMIgRO04f1kjtIqxZAUPIQXoZOIrGxCGtScHu5FbSHHEVKrj8m6Do2G8/Rdqic2HpcckVGbPRuZA6KC3OQGvMUv8+yINHUB295pArqqQvrxQFIKq1GbeGDJrHV50QiKqkQVbxixBx3hV7/HYityYU/qbKaTzuGoMRcFOal4lNMFrinCG2DjNhCidiCe3hk61HJFXnhWGvbi10XKVrmGDp1E/zj6av3hKiOO4tFTvrs+B9hZDcL/tl1yAuYCzvmLiip6lq7Nd11bCwKwsGfHGDETK8BW+8rkH5RNMefQ+XEJoZLrsjR0ais2LjkihwdjcqKjUuuyNHRSIuNurTDg193b7F1hng5OL6FyoqNS67I0dGorNi45IocHU0zsV0lYntDxBakAmJrv+SKQjQ21KGuLBw+Q7wRWESG68SlFEFL+mP6o0IyXA+y71m4ZImqQI8UW0tot+SKzLMw9pmX0qKDuUFV7EzgkiWqALJiCyJie9U9xUa9b9SS0xLaLbmimJr32DR4Cq7EpCA1RVw+49ZMW8x4JvFQmkuWqDL0KLFRkyn1ulFLDnUKKKO9kis2QcS20dYMo71mYJa3uHhhnIUBpkuKjVQQuWSJqoG02KhLO6y7io1CTabU+0YtOdQpoIj2Sq7YBBWbnQ08l67CmlXishTTbY3xUzOxcckSVYUeJzYKNZnSdhG15IiRXkf7JVdkodVIpwk4E/4RMTHiEoEr0/s1r0ZyyRJVBhmxhXRzsUVEhDNu7nlzZiv1vrVPckV6f+Q4POys0NfaAmbUQ6ZuAGtr+t0KfUxFL+YxtBB9d1wYiFLpgMUlS+yx9Cix0RcB0TYbfW3Ct9zc7ZVckSKszcTro3MwmFQLT3/hoTrmIFYe+Igafi4erByIPqPX4XJELmgmYC5ZourQo8RG37il6EVA0rRPckXSAsu6gunmenCafxCnfUbCjkQwG0NRhLMhw3ajN+LKyRVw0f0B/Te/h+QLB7hkiT0bWbG9JmJ72b3bbC2hfZIrEgRVyM2ravYQuurlDNhOfw7J2zXC2gLk0CyLXLJElaFHiq0ly2uv5IqU2phdGNdP1C6jRTKyiX8b6H0dufS1CVyyRJVBWmwRRGyhqiA2LrkiR0cjI7ZgIrbXKiA2LrkiR0ejsmLj4OhoOLFxcHQQsmJ7RcT2oueLjTOPcnQ0Kis2zjzK0dGorNjazzxK4KfhnPdcXJF+4WJNFNY5eEDytY9/Ds5s2h3pkWJrCe1mHiU0JB6Ai8Mv+EC7hzACc8Nvx48gMDVMJLbiDPhvO4xQJg8UICi8j2XDB8JpkFQZaAcrDfqMzhWXc5rLhzObdj+kxUa9bG9eqYDY2s08KixH0AoHuJ9JRsbdTfC9dhurHCbj8qWZGLPxDJY7TIH/w9VwHHUcqQreNCysy8P7gINY6e6CcXN3ISCm5OvDbs5s2m3pMWJrbYbS9jKP1nzcjsFWU+F36QCm247HmdhQJpo9zk1EcNA9rCTCuxkZSNZLXw9OhMVLQdC9AMZhfu9FLIorCxG+0Q420/3wIiEJz8/fQFJtDRJvX0RoEY1unNm0uyIrtpdEbM+7n9ham6G0vcyjdfFnsHH1ckwx14DTro+oqWarkTsnwt7SCJrqP8DY0gr2E/wQX0+rg1G4sHc7dqx1g/WgtTi41A3Opj9Ay2YoPMgFwXfoEKzz9YLj6K14xWTX4Mym3ZUeIzZKazKUtp95lI/cm7PgMP4Y4skJL6yOFLXTKmrxeYcdaX/1w+aX1BjanNqPv2DIqAO4GXAFhzzNYbfkBG7ceYjLXobou+wOMqgfh8KZTbstPUpsrclQ2j7mUSEqI7bAsZcGBk2cgJFDJuNwVDAjtofx1+E9wBmOBqZwse8Lz8MRoow1DALkX3ODw9LbeHH/Ovy8zGG/7A/cuh+C6Avj0G/uc5QrClSc2bTb0KPERmlphtL2Mo/WJQfgxKnreB6dCV4jOel5kfjZ3gVrpjlh1oU7WE2E9yg1GH6+V5EqDj38LFwebw2PrYvh7uoCJ6MfoGnphJGuY7Fo/3aMtiDtvHzR3UjObNp96XFiayntYx4VgJcejgcXj+DX5V4Y1c8C7sf8scphCu6l55MLgbznbHzk3Z2LvgO24H1lLXi8YkRscsCo3xNQweOhpq4IT+aYof/6MFRKRSvObNq9kBHbayK2lyogtvYxjzYi9+II9FY3wch5O3AtMg91zA0SVmCCauQmpYN6RkUIURW5GU6GLtj3vpJU/aia6vBpqyPGnBEnsKd3+89hkoEVVr0sJdNwZtPuirTYwojYQrq72FqyvPYyjwqqC1FcI9FWrPsCPw8n2QfWQzxxPKEewqpkRMRVkJjIR8YFT9hbmMJI0xorXpUzjwZENKI46hE+lDZyZtNujKzYXhCxPev5YuPMoxwdjcqKjTOPcnQ0Kis2Do6ORqXF1pLp8ivj4PfaGQtuqDFlob8atj01Q3JxEDsFB0fLkBHbKyK2F5zYmtjxyBmZdZeQTkpqzVkk8k4gtnI/Dj13Z6fg4GgZnNi+wYgDaniZvQr3k+fgdsJ03IzzwO1ED4w81HwXpRTXYPGVj7Dd+YopI46EIT7vzxrXBKgtKUB5A3frvichLbbQV88R/OIp12YTY++rht9Ch2DXs77wfWyKtXd6YeH1f4Xj7r9h/vz58Pb2ZqabfSIIm2MasP59PVZG1mHhm1psvvEnb6SU3Ye7rhNOpEn3oGwNQjTU1BPZiqlC2Apr2Cx8iQqq4doEXF7oCCP1H6Ch6YVnuWFY3ccCi15IPnLgaEtUUmytSZpouuavcPvtLxh75K8Y7/c3jP/tXzDx2N/J739hxi9atAjz5s2D7pKLGHmvBE7X8tD3fDY0juVAf+EfzDRyqXqBGfrW+CVask8jy3eLTYjS+5NgMvwsspsWwUfOw4M4eDcDDUSChTcnwtBqGe4mFKC4uAINDdl4fGg/7ma09tkcH2mnR0OHipYpOug3Yh4Ov8gl6+GQRCXF1pqkibYb1DHR798x+sC/YQwp9HMC+e6wuTczXhzZfpi6F/+1Jx7/ue0j/oOU/7Uzjvz2NWWVDO0stpI742DoIik2SWrxYVNfWC58Ax77y5+nAUmHHKDreh7JJaUozPqCF0e9YN57MH7j+mY2Q2WrkS1Nmngr4hIGbzFE7/n/aCp912ngdtQlZvzMmTOZT+2fduPf97zD/9zxlil02GaJHzNOLs3EJkBZxBHMGqDNRAczBwcY9PoqtsbiYBycMRCmZJymxThsDcxneo7UxuzFZFtDaDERRRP20w4hspxWHEViE0UaWgbhaHIF3vtYw3p5OKpRQ4Ytvo7XnIaXRR/ha2uB5WEi+Slap7AyHLvc7WDMzKuHKVdSEU/Epjf2ForF9U+aCNKyN9zvlTKdrK9Nt4A2nb6XGcZufIQ8uqDGAgT6jIatrmgbLOcEoiDlGlYONRBtk+EoHIqtIxMKUPnhDyx2MWOWYeqyCv5p9HegLvYovB1NRP9fcxgOxXVtU5FKt9lakjTxW4jFdin4IwwX7cO/jFrFlB9nbsf1sC/MOLlIiE1Y9hyLTbUwamcgEjKTEHltJfppsGIjJ+WdaQYwm3Ya77JyEH3KAybGs/GsTIiqlz/B2Ho1nqbmITv2ITY7aGDAjs+oE0e2YaeRXscHn99IfqECkxSbNayWhqCST8Y3CiCslRCbknUKCq9jrPYA7A7NQlF+OjIqapnIJhabsKEEX24sQz91G/h+oBeSehQmJCCHRL2cN3vhqmmBdVE1JCDSRP/kP5/+hPyiXKRnFyB4vjGsF99DRlU1SjMSkVsthLAiCKssdDF2fxDS82Lhv8gCBm5XkEsqJMz/t1qFwNRCFGRloKSL9wWVEdtLIrbnKiC2liZN/BZisbUaCbFVvZ4FE/PliBDX6SSqkYKiALjr2GHXF/aqXR2OlRaWWBtZw5xsJva7ILqgk7bTicHQH3MDhQJ51UhZsYmGWSTEpmydjNh0XXAxW1z9FlUjm6IkLXqDMP/3d2CCrCT8TJxz0YVbQBERJRWbLjyaLBA1eLuWCGnEHgTl0MuFCF7QXJiaLQUbcFEfuwsDDbzwrEIktq//v+sjK7ZnRGyBPVtsrUma+C2+X2w1KPIfDT3HI2jqNywhNn6yHwZLnshM0cGsl5VSJ5sQxQFjRQJr/D6xKVunIrHpDDuGdynpyC5s/u4TIe8LLi5zRR8dsowftaCrro5x/oUQyIiNVBjL3+HscleY9dKB84KTeF/eyOyb5ttBSq8x8C8QdGuxDSJie0PEFtTTxdaapInfQiy2xqrPKAgegoyb/40p2ff/C3Vl75lxcpGIbLygeTA1XYQQcdNRMrIV+mOCriNpc8nebJAWm6TAyu67wXDwcbDNPkIrIpuSdSoSW7M2WxONyLk4Anr9NyMorw4CEtkuuOoqFJuY+pxn8HXUgO0vH1D0ahZMbdZD3n0kTmwSdFWxtSXiu5HJN4eQ030PhMJ9EAp2k+GtSHs6hxknF8k2W1Uo1llrwHGtPz5kFSAv5iRctcVttlz4e+jDfNoxBCXmojAvFZ9iskBfP6JMbDVRa2CjOxa/R2UiO/EjUiqqWiw2ZetstdguuELXbjNeZpajpjpdidj4KIyOQFx+JXhlCbjqZQDLpWFk+AWWmOlh3O5HiCX7Jj/jCz6mkAhL5uDEJkFXF1tbrJdGNvpwO/IXNTRWL0B9sSfqCkaCn6+BV+v/zk4lBwmxUaHw4q9gzUhz5u1bGuoasHBegUcFohO6sSgIB39yED2AJuNsva+AvmxZmdjQkI5rC+xJtY3MozcMOz6UtFxsBEXrbJ3YaNUwEkem2UGPWc4P0DYahFUvy2TbbMIKBK8hy2GmU4elK73rSP+YABXRp7BoqDEzP72j6X4kDvR+JCc2CVRBbGLuev8FtfH/GxXv/4GKd39DzZd/xR3vv7JjOTjkiO0FEdszTmyt5ua0/4Oi4P+O4qB/MIUO311syI7l4ODExg59P6mvL8N/jilOOP6FKdemaiEj9Do7loNDntieErE94cQmhvOzcbQVnNi+Aedn42grpMUWwomtOZ3jZ+uqcD6770GlxdYSOsXP1lX5bjeCaqOSYuuSfjZ+Hu4tsIDRuKOIYxJmdEEkxSYown0vPdGzL1q0LOAyYzvupdSAi3vykRHbcyK2pz1cbF3OzyaoQMT2ITAauBFBJd/XV7NdaSa2AlwfpQnHPe9QWFqInMQ3uLDIBpp9NnJJGBUgK7ZAIrbHPb8a2WX8bO9KEHdyIkwt5+JWlkT1jDqnfd0xQJ9EDc2+mHYwHKUCPjJPD4Oe8wmks5NWBc2DRZ9VODZFD7ZbPoKJk7XvsbGPGZa8EfUGqY/fC0fDqXhSRmIOiaDPtk+GnSZZroYF3NYHQGQPa0D6PxfB1UJTFKls1yGqWonPjhGbFoYcTWF8bswSaAdmzSE4ncFHzdtNcKbbTubTt5+JkzFVTMST8aDF5iNs3xTY9qbTasB2wSMw1xthDZKur8ZYa7o9unCadxpfeGQJcnxw9G91B1RWbJTO97OZYNpaD1gZT8bpeMnqFx+pJ0fAwGYJ/D/nIjNkL0bpWmPj22o0JB2Ek+5YXM+jEbkOn361g/nsp4g/6wKDERcZnxc/4xRcyP9yPJRAJCRA0S03GLueR3YjHxnnxsLAfBbOR6YhM8Yfq2w14byfdn+iXbisYDr9OhIKSKTKyEd1iRKfnZTY+JXJeLzZEVpG8/G6gmiiIhXxaYUoLYqH/wJT6IyR70ErSPwdLrrDcDS6GNWVeUhKLgP9Z7Ux2zFIexC2PE5EXvJjbBqgBefD5P8w3bwkfXBVTD/J7oDKiq1L+Nm0RVdn3bF++CiZdJ6fhhODNeF6TpxcowyPPfThuJ+ebAk4NEgfU24VMr3oz7saYsqdItTG7cYgo+l4Wi5AyX0v9LPrC8sJN1AgqETQfHM4kXnr+ek45awF17Pi5QpRcncyjGy34lOdbH9JZT47kdhE2y8uOrae2PeqkBGLJLzQxbDqtxHUSyrdn7Ex5zLGaVtgybVYVDTNWIuPm/vAyOMBSpjdQjs004vJFeTVKnYLdHVUUmxdx89mBZ/HD/DrsN7QHbkf0WLB0WqgVfMTmZY+Pm9J/CFR75gzTCbeQG5BAKaYjMaVHHKW1rzD+j6WWB1RgJAlAzH76mVMs52F5/nvsMnWFptp25Asd5ONAeNLE1Pz9mf0MZyFoCppsQmV+uzEbbYBvq+QmJ6J/HLJN3nxkf9sO7wGGIK+ykCbXlSs1iO6RlZs1Mmd+XA7pttpQstqIn69n0F+qcJrb1HVtVlxOoyk6p4jNmocfd3TxdbV/GyCsjDsGtobxp4XRAkS+Sk45qQDt+sFcqtIjblX4W7iiv2/kyroKFI9ZMIUD2ErLDHg57NY4zQR/jmZuDzOFotOb4JTv9WIpAqikW0IiZhN6aiEKL47CYYKIpsyn528NlsT1RFYY2EAr/OxqOQLURmyHH36KhIbC4nAn89Ng6m2G24WVOPDRhuYzXoBUiNtjhIfXFdHRmzPiNgCVaTN1ha0hZ+Nws+7h8UWGhi8/S14wgYkHx0G/T6LcDkiFXkFOUiKjgGTv54iLMerhdRyoonxF7Obqm28kCWw1NCG0aizyOLzkX5yOAy0f4T1ynD2LVqkzXZ2DPRJm+1CVDqySJttNWmzDdkby7bZmotNqc9OqdjoaxSo2Mg282pRGrwCfRWITVCVgqjodJRUVSI/dBscNF1wPouPmujNsNd2xMZbH5BRUIDshA+IKyVr6lFie0LE9kg1xNYW66WR7fv9bBQSAcI2wk7DDtujyenekIWHvu6wY9t1+g7LEFj8Nc7VftgEWwMP3CmUiH3VkfCx6IXhp9IZAfDTfofLjxbY8Jac5WLo3cgdk0V3/8i48RsCkM7cjZQVG90mhT47ZWJDAzJvrcZIU7b6p66DvpOPIZEITFpsDcmn4GmhLppOxw7TD4aLco0Lq5F4bTXGWmqIxhk4wzeK7hdObHJRBbGJ6Rg/mxANJALwShNwa6ktBm2KaoP3PnJ0FJzY2oiO8bNV4c0SU3Kl742Bs0/hs+QdTI4uDye2NoLzs3F8C05s34Dzs3G0FdJio52QX3Fi+wrnZ+NoK2TE9vQxXj15yIlNDOdn42grVFpsLYHzs3G0FSopti7hZ+O9wXIL8XOoH6BtMhCe66/gc5W8PiNtjJCH+Osb4TmAzRijb4cpG64hjru72a6opNi6jp/NAmte5aK0OA+pb29gg5MGzOY/a2fLSAPSzk+EQe8BWP7Hc3xKTsan56ew1P5HGLifRRqXUq3dUNlqZNfKz0YRMB1/dfrSfor1iD8yFuY/0qinAdvJe/CGMXnJes4iC2Pwx+wBMKDfe5nB62KGqEeHXD8c+b3yNZaYaMH9claznh/8zHMYp2mEJUG0nVmF4LkmGLjzC/PmYQhLcW+8LoazfSpbmrtt0r51sNedgDtFomjNZMfRpzkEZPucqAIq3WbrKvnZqIWEl/UaB8dqQdfdH/kCAaqz4pGSV4qStMfYaKsBx4PUm0a7VEl6zvKQdWsCDO22IDifB15RCpKKaGhS7Ierjd6IvlrjEcAKoAlBAfzH9kaf9e9Rq0xsrcndVhABHytDzHkmytPNC1kEy74b5CbJUAVUVmxdws9G3dJMFKBFHTbjN+J+lnQ9rg5fdlCD6CvwZPovClEWOAPGRp449bboa6RS4ocrC5oNY8N5X3vyN1GFoLn6MJpJ16NYbPWtyt1WjbfrrGC54DUqUY/YnfawXhhElq6aqKTYuo6fzQxL78UiLTMPpbUSbUdBKSL8ZmGoWW8iwh+h1/sHGHi/IiepnM7C/EIEH5kDZz11mI1YjWsJ1RAq8cOVvvOBjZYbqdpJNQwFhbg1vjes11HPnEhsDkwWU4KE2GpblbuNnGAffkF/s7l4WZyGU8NMMTOwjIlyqohKiq2r+dmkYd4Zojscfu9KwBfW4vNue5gpEhuLsCYFt5dbQXvIUaTWKvbDCcueYo6BNjyu5zZzVPOzLsNdywDzmSpfNSJXWcBKvB7JyNaq3G2EhiQcHWKCqcf2Y4zFNDwSWa9VEpVus7UFbeVnk6SevuJAZziOROahqqYSMbsHKBRbfU4kopIKUcUrRsxxV+j134HYemV+uDrEHXGBdu/B8PlnOJJzcpAcdhk/O2lAb9wJJDO1QwGKbk+BoZEXTkemITcnBn+4aLNtttbkbqM0Iu/GZOYGjrH3I/Y1B6qJSoutLdZLI1vb+NkkaCzE861u6MO8cYoULVOM9H1PpCYtNnIiB8yFHTudtrVb051BpX64xlJEnVyMURa9RMv/0RoTf76EmEqJOFifBv8VzjCh40nRNXfGmsAiJlK2PHcbS+UrLDQxw3LmTqfqwomtjeie+dkakHjYCfqDNiEwq7bN21LCugpUVhXiw5lp6Df8MGMeVWU4sbUR3TY/G2nf3fIZBQt1dZiP2Ma8uqBtIFXRu57QJ9HPyHk5bqQyt1pUGk5sbUR397MJaguREp+NahVuU7U3nNi+Aedn42grOLF9A87PxtFWcGL7BpyfjaOtUGmxtQTOz8bRVqik2FTezyYFL2gWTCzXQPL1kkxGGp2xuF38J++YcJ45GVRSbKrtZ5Ol7cXGeebkobLVSFX1s0l7zqZcyUL5N8QmrJK/DkW+thZ55mo/wtfWAsvD2NfMVgVjoZkddn4WPY/riZ45lW6zqaKfjelSJek5qyDrVio2AYpvy1mHEl9bizxzysTWQz1zKis2VfWz1cnpv/gtsclbBxNBFPjaeC3xzCkRm7Jly/a/7D6eOZUUmyr72XhyxTYXphYrRWmlWBoSD8JRZzzu0W76ctbBiFFq+WJfW01LPHOM2MyxLFRWbHwly5bX2bm7eOZUUmyq7GeTd7LWfdqG/lqjcJXm4WWgEXMmjE0WQawFiuQ6UnIV+9pa5Jmrj8cBB314PSoTjZSMbD3UM6fSbba2oLv52eSerHWfscdBHaYeBxEYHYdPr89gcR9SrV0TCnqnXu46ahT72lrmmatEyBJT6I/ej9dJOchLvAYvQ3GbrWd65jixfSc0snUnP5v8k5XII/02tkzoA126Pg1zjFl1GXE8etYqXociXxtDCzxz/Pwn8B1rht7s/GaD5uBqhmgBPdEzx4mtjeiefraOgPPMieHE1kZ0Wz9bR8B55hg4sbURXH62b6PqnjlObBwcHQQnNg6ODoITWw+DX5GPCvEdQY7mCOtRGBOMtwWds4M4sSlBQHZO8PoQRO2NRu6bXPbXLkxDMk6OtoL33UKZh9mtQshHbW0PVGxDEvwG6cIjsJ0eDzTWooavuEHKiU0BH858hJ/ecYStfIKKR+9wefBl5Efns2O7IkKUBs6BlcN2fKoF6mK2w4l5RiV6TmU+yB1rTwYjX7ZThhQ8hC62gKP4Pf9K4SPjvDvTM1+0Hm30dZ2H30KKmvUcaQ8qn3lCu2m9ksUZp5se9knR1mITFOD6KC0MOZoCft0n7HSw/NrXUw6c2KTIepuNfZaHcc31CrIORSLjUDBSDr1E6Nq7+M3uGDtVF6QxDzfcjDH2gsjWUvN2LWwMvPAguxwl+Sl4d28/vK16wWL2TeQqDVpSSTWU0oCkQw7QG3UZqaXFyE2KwI11g6ClPx0PpXv8tzHCuhLk5eQgN/sLLozoDfutIUin33OLUK1I6e0pNumO1XLgxCYBr5iHW4tvI8r7FZKWhOPTgtd4v+AZIhY+RMiMJ/j1/25H5KUodmr5CCtCsGW0DQyZq6w6LFwW4fT7ClG1jp+Fa9MtRFfkXmYYu/ER8uiJ31iAQJ/RsNUVXZ0t5wSiIOUaVg5lXc6Go3AoVnTqK/R5ldyDpyG5qrM9MBixGc5CkET394bk4xjR2xQr39CTTZFnjopNV7ReWizXI7pGsb+Oik1//F2UsrUnYVEA3DT7Yccnur2K5uMj7/EmjLdQZ9ahN2g9IplzVIDKD39gsYsZs49MXVbBP40sh1xIbk0zhtW8xyhpkBimi2LyEGjD8VAi2RoRgtJwHJ3pIDoGxsOw4sIXMJ1hJMXWWIjA5TYw97woMrMqymfHz8XdZc6w1qH/gRST4Vh7M4P8M7oiKbHZsNPQ/8R0r2t+vLRs3LHiYQ6O9TSxySvSVORVMJ9fHnxB1MUo1FbVYuewTYgZ/RxvnF/gpfNDPLC9jauaV3H0Lyew8+/74dN/DTOPIpjuRNoO2Beegdz0D7i9aQh0jGbjCfPqb9JAT0hATkkpct7shaumBdZF1bAngRZGnf6E/KJcpGcXIHi+MawX30NGVTVKMxKRSx9OKfOQfdiE/pbLEMF2mpQnNtrn8LKrBvpt/ohacmLL98yxGWy2fwSPzwe/kW63ommlxCaoRNw5T2abApkOigrmIyfmVltDTL2UgPLqcuQkpYO+DUJYEYRVFroYuz8I6Xmx8F9kAQO3KyQSVyJy/2wsOvoR1UKJYfqfpMUmKMSDmYYwmnAIQcmZiH+8BS7a1vAJJztCLLYn+Yj7fTzMHTYgWKQohf4/8bEZfe4LiZppiPhjKkz0PHGPRm6ZyGaOpcEV4JP91iiQPV4Rp6bD3GUz1kVwkY1h8wRf7DdYgWt/v4Pzf7uM3//2Bw797Rj8/mMHdlhMxqaJq9kp5SPTd6/2A3z76sLzfknzrkr8TJxz0YVbQBGEMtWbGrxdS060EXsQlFPXNJ9SD9krb5g57EU8O0qu2FCJ515aMF4QQlpmkkh65r5VjZScViQ2GsF1dTShxVzVf8SoAx9EkaQZEvPVJ+DgIE04bniI1Gp6sotgrD5mSyGuidXH7sJAUhV+JromykdKbMKi25isS/YR7dDMUIU3S0xhvpD8Z2Y/a8Jp6XTYmk3F5VR2Zynx/zVIH5uqICw0IUJ8Ty6S36hGSh+v2opwzBk5BZMeF6qm2JJfJzOfby+9xesjr1FXWwebf5jjwv89BL+/H8eBvx/GIQsvjPp/5phm643i/GJmekXIiI0ckBujtOFyMh0NvC+4uMwVfWiV5Ect6JKTdJx/IQQyYiOzlb/D2eWuMOulA+cFJ/G+XKDU51X18ieYDtyPBLYuJT+yZeOSOLIp9MzJEZvCadk228iLSMgvQH5WMqIf7MMkA314UXuNwvmE4MVfx6YJltDStIP3gVco5AuZ10I0/2+k9BoD/4KvgpRBSmz85N8wRHs0/AvF85BtPEy2cVwAiuvpfibL1PoB2kP34F0le0VQ4v+rkT42tdHY3I+KikS9b4hN+nj11iTHfMAYjL6bz0U2Mfs37IeH+gCcNF4AD10TGP2nFV4/es2OVY6M2Oq+YJedDibfLUT2xRHQ678ZQXl1EJDIdsFVV6HYxNTnPIOvI2nv/PIB1Up8XjVv18HW5qvbWp7Y6hP94KIharMp9szx8GaBKfozVU12PoXTyrbZaPR85a0Hs8WhKFU4nxg+SiIOYpyOARa8IheMV7NgakPaiHKMEAqRiWwBmKRrK7LqMFQhZLEJzGk0Z/fz5FtvcGycLtmW68imoYyv2P8nc1NFUlSSYquLwTZbE8yX2OHSvjyVvkGSH5eP1JBUZphGtjcn3uDJr0+Y75sWrcXssZ44vut35ntLYcTW2xQLLoQjOSsFocenwETfA7fy65FzwRW6dpvxMrMcNdXpSsTGR2F0BOLyK8ErS8BVLwNYLg1DtTKfV8ENTDBwxeUckcgZsel74nZKPnIz4hDmvxNe5j/AbKY/csgJptgz14DEgwOh47gdQWnZSImJQ95nxdMykW3UZaQUFSIvMwERNzZhpJYmJl7ORrWidTSWIi7yE7LLeKjMfESqwjqY+rAUgrIXWGKmh3G7HyE2i0TKjC/4mFIJgbACkXtnYb4faUdKDtM/Kq/N5k3abBMPIzglCwmPfUmbzQo+YZXNquuNRU+wjKx33Mkk0pJWks+upWJrzMPV0Zrot/oBEnPSyHEpQIPU8crKTsFt0pb/jbsb2TYwYtPQhIODKePT0raZiJ3PCpi2gKA8Ekem2UGPrVZoGw3Cqpdlsm02ckIFryEnMTOdOixd6V05Ub1foYeMn4EzrsbwCBA90K77tEOiCtMLpvZuWHnsFXLFQVGhZ44squAR1g/TZ37Xtl+J16UFCqalz9kmsG+6okUdxrajscTvNZhOGorWQU7YXa7snVZ1AzjPP40vTCNPgIroU1g01Fg0rpcZ3I/Eoa4xHwHTjGDJ3I2UGKZ/VFpshGZ3I42Gyr8bSdZV8mwxLHXG4Ty9g6son11LxUaWVx62CxPM6Pzq6Mc+YpE8Xr019WC74i72RHNiaxNkqpEdRiPyrk+ChetxpNITnaPLwT1na2M6T2yE6g/YMdAC8x8Xy7Y9ODodTmw9CiGqMz4gtRNeYc7xbTixfYMpalPYIQ6O74MTmxJGqI3Ak78+xm//9hv7CwfHn4cTmwImqE1AlFo4EtTiEfSXIGz+22Z2jKogRF1BHD4kVTTrwc/55ZTwDb8cJzY5LFZbjIdqDxCnFosstSxEqEXgotpFeKl5sVOoAtWIWm0FW593zOMABs4vpxzpxwRSqK7YKkXTRL69hnOPb2LV0bvM99lqs7FV7Vf8rnYc4WqheKv2Fo/UHuGY2jFsUtvEjO+KyO8L+T1Ii03SL8dH2unR0GGek5HyowEcxi3CoSfpqG3qSaKI7uCXo//dlF2nVOn3K5o6p0jDia31LFdbgWtq17BLbReuqF3GSbUT2KK2BfPV5jNi64qCa3exNfPLiXqO6I64gJTSUhSkf8TTE4vg2FsXk07RHhnK6A5+OSEayguQS/1xSQGYYWCGpY+SRd8LK5kOCnLhxCafRhrZqv0RGXED7z7cwMUXN7H7+k12LOCp5on9avvhS0S2WW0zFqgtgI/aOqYquXjxYnYqWTrLzyYpNmF5MDaNtIZRL3Z5o1dit48nHA3odwMMX31b1CeQnMyp52ZhsKmGaD06tvDc+gBZjFqai625X44Vwdhb+JorsRG5NzxgqOclsp8o9LJ1ol9OWIOk66sx1prmt9OF0zy254oyvxzNQWBiCZ+mFD9C8D6fw7JhRsyyjQbNwrGIUtHxlRSbHL/cva2esHd2gem8Az1LbPKKPEJubcCbgI0IOLmQ/eUrU9WmYoaaN35S+4mJdm5qbkqFRmEeaneCn01SbKJtGIiDb3NRmBGCA8N/hKbLXrxKykZG+BGM1THDqnDqBhO9ztxsxk0k5GQjMeh3zDTTgPOBeLKlzcXW3C8nT2yE8seYrqOPBUx47Xp+udqY7RikPQhbHiciL/kxNg3QgvNhMr2kR07aLyclNmFVGNZZa8HF9xHis5IRdMgNRsaz8IheYMRiU+SXs12BI5HZ2PPgUc8RW0sJubUe9RW30ZgwB42Jc3DKRxv2w13ZsSLc/sUNY9RGY8oPU74pNIpMD5IO8rPJiK1pG/jIOjsMBqOvgXGqNObiyggdjLyYQ2KRdO4AAQpv0sSH2/GlrrnYmvvlFIitJhI/m2vA/T6bmaaJruCXq8XHzX1g5PGATbzRiJwLLmQfX0GesgaglNh4wfNhbrYEoeLqet0n7LDVxZS7xexxVOyXG34uA9FMNTJXtcQWcpMIrTyAEdummf+OrKfDgWg9/EEEJ42tWr8WCY0iI7YO8rMpFpsQJbfHwsD5FERvTCjHowm6GEa2hy8jNlod/Rl9TeYjhNdcbM39cvLFJix7BC9tNrJ1Ob9cFV57a7P7TKI4HUaSuAezPJqJTYiim2Og53gETS4n5viSCHksBXzmOJJlKvDLifxspBo521e1xJb86hCq0g6QqDYb8Q8mIenlTFS8NGLE1lJhyUNGbB3mZ1MitjvjJMRWgccTFYmNTHt/CoxsaV7v5mJr7peTJzY+cv45Efpsm63r+eUK8WGjDcxmvSB7oBVIR7ag+TCTiWz0+Iojm2K/3Phr+fjQ026QtJS4+xOB97pMNbLihSFTjfweoVGYE70T/Gx/XmyW0B22HYGfMpD5+TZ8BvSGvS8VgqjaZeh2ASk1Aim/nEgEuq5nEJeXh6ykKDw4Mgf9e2lj4slEJmJ1Rb9cdfRm2Gs7YuOtD8goKEB2wgfElZKdoswvJ9NmC8XPVqTNtvUxEsjxDT5M2mxGs0R3RyWOo1y/nN0y7Hudiv2hmaonNkrcfXcmup1ap/XdQqMwJ3on+Nm+R2yaZgNhx9wJNcCwxefZvGxkmV+OwsNcF2MvkfZdM78cH+mSz9nU9WA3ah4OPExlkyESuqJfTliNxGurMdaSvftq4AzfKBLTlfnlpMRG9ydzN3KoIbMMw4GzcCyyjOwTQrPjKOuXu7PVE3ZOKliNFEOjW2PCLJS/MCCC02R//fM0P9G7OrJtNsVwfrnvpUc+Z2sNcfcnoDRsDDZ5/1vbRbYeKTYC55f7LlRebJRNM/5Hmwit58P55b4HTmwcHB0EJzYOjg6CE1s3pslbJqhGUVEN147q4vQosXW7fGrfg4S3jPd+Exxs1yJU3GOBo0vSY8TWHvnUJJ9dNc93pg5ju3FYeTIcJZ1y07F5LjY05uDaJBOM/D2VeZ7H0TXp9mJrz3xqkmJjhg2m4l5WKUoK0vHxwQ6M19XG5Ku0Q28HI5WLjVIZtAjW9tsUGxs5Op1uLba2yKemDBmxscMiaMdWPZgwGWEU+7HS/7kIrhbUP0XG2a5DZGEM/pg9AAb0ey8zeF3MYASjMO9aZTh2uduxvSj0MOVKFhqkcrExVDzHbNNBOJSorFctR2fSZcQmr0jTHvnUlKFQbMI65EedhrdRL7jQ3t5Q5MeiD42tYDr9OhIKCpGTkYesW9TCsgXB+TzwilKQVETEocSnxjwk1x6A3aFZKMpPR0ZFo0wuNgZ+Ok45G8DjobS9haOr0O2rkd+dT60iAvsm2sDSdgxW/xGKvOo8PNzog4BsvozYrJjoIi5GGLniChKoqbMZkn4s6R4aQpQFzoCxkSdOvS1qqgIq86nJ65EinYtNRBkeTtCFyylRpOToenQ7sbVtPjUBiu7OhtuvrxAXeRVbxpswQjKYcBLJ5ESWiWx6k3D1Uxoycoqb521W6KuS0x2KX4jgI3PgrKcOsxGrcS2hGg1KfGryxCadi01EOdPBmPrmOLF1Tbp9ZKN8Tz615ghQW1GJevaBlYzYxNVIKRT7sRT3PRTWpOD2citoDzmKlFzFPjV5YpPOxcbAOL/14H5XyhHO0WXoVmJrj3xqymix2BR6t2TFVp8TiaikQlTxihFz3BV6/XcgtkZJ3jU5YpPOxcZQFYIlFnbsi3A4uiI9IrK1Fy0Vm2LvlrTYGpEXMBd27HTa1m5Ndx0V+dTkiU06FxuFiXZ91oLaszi6JpzYuiVS3jJBCQLnmMNxV0vexcjRWXBi665IeMuqY7bD0WIW7hdKRD+OLgcntm6LhLesPg+fYks6vicLR6vgxMbB0UFwYuPg6CA4sSlAWFeK3ILqNvCICVGT9R6hMSUKHzZzOc+U8I2cZ92JHiW2tvOzKX4Y3Xq+sSwu55lyZN6p2cY01qKG3x7dAIRoqKlvdkx7jNja1s/WUWJr7ktr7pnTgPkgd6w9GYz8b3bk7w45z4DKZ56iDD4yxRmn6UNFebS12KpeYIa+NX6Jpjv8E3Y6WGJ5GPM61jaEHNf7k2Ay/CybLUhEtxdb+/jZOkhsUr405sG5gRceZJejJD8F7+7th7dVL1jMvolcpUGrO+Q8I6dgXQnyaI6z7C+4MKI37LeGIJ1+zy1q3tdUkvYUW+1H+NpatIvY6ItxDV16kNjaxs8mBC/uEla6ijoh97bwxMX0SiIQC2homYhynGlYYOLWZyhkd5wi75niZYnF1oCMf3rB0noRHhQ0SuU8Y8Um1UulIfk4RvQ2xco39GTrITnPhKW4N14bjocSydaIEJSG4+hMB1FeO+NhWHHhiyhTjaTY5OQ8e+zrjgH6ZB7Nvph2MByiDE25uLvMGdY0gQldnslwrL2ZQf4ZQVpsNuw09D8xXewUH9+62KPwdjQRZdPRHIZDcfXkmG2CM10/+U3ffiZOxtC0HiKxiZeroT6I6fdaW5uLM/vXwG5eJ78RWV6Rpj38bMKqcPjYaMFl8z18zqLvno8h1TYajaxg4nEBH7NykRpyEON0TbHiDTkUSrxnipdFxRaKvMjtGGbsioMfeeRwkGMt5UuT2yWsMReXXTXQj0lE0UNynkmLTVCIBzMNYTThEIKSMxH/eAtctK3hE052hFhsinKe2SyB/+dcZIbsxShda2x8S9bAzKOF0ee+kKiZhog/psJEz1OUpFEmspljaXAF+GS/NQroRULx8aVuC2OrVQhMLURBVgZK6oVorEhFfFohSovi4b/AFDpjriC3kY1sw04jvY4cDz65sJLtTTw3ESYjfsGix2ndsxr5vX42Jt+W+TI0r0lIVf2EJbjnpoPBfsmoU+I9U7Ys0zGLMNHMBsvui6OgrC9Nfv/LSjz30oIx4wiXpBvnPJMSm7DoNibrkn3a9E6HKrxZYgrzheQ/M8JRnPPM9Vwmuz/L8NhDH477idClq55VQVhoQoT4vkaO2JpXI5V5C6nYTOx3gQQ0ufBCF8Oq30Z8qJVTjeSn47iLIYaez8Cx7lKNbFs/m5x8WwzS7awqBM02Zk7maoXeswoly7KExo8a0NCbiNMJ5CCzSPvS5Ee2bFwSR7aekvNMSmz85N8wRHs0/AvFIibbeJhs47gAFNdT4ZBlKsh5Jr3uPj5vUSMtttpobO5HRUWO5jfEpiwHnqzY+Mh/th1eAwyZGz/a2mRaK1qFlyM2sr3rbc3INpV077uR3+Nnq3o1CyZm34hsEidzjZIcaUqXteQRnm51gl6flXhWJLrsS/vS5ImtPtEPLhqiNluPyXkmE9kCMEnXFjslIlvIYhOY02jOCkdRzjO36wWyj0xkxCYhKkmx1cVgm60J5kvscIGy4ysttuoIrLEwgNf5WFTyhagMWY4+fanYSJy97wbDwceRJhnZhhlg6LluEtnaw88mLH+JZeQqPmzTbcRk5SM7MQbJFVUKxVanJEfaN5fFz8TVqaQ94C26uyjtS2PEpu+J2yn5yM2IQ5j/TniZ/wCzmf7IIdP3mJxn8tps3qTNNvEwglOykPDYl7TZrOATVtksnZbcnGd9FuFyRCryCnKQFB2DInpyt1RsjXm4OloT/VY/QGJOGjmOBWhQcnxlxUarmFRsZL28WpQGr0BfVmw1UWtgozsWv0dlkvPgI1Iq6pB4dgKMSZttcXdts30/AlR+PI0lQ0XZ/zX0hmDr+xLFYiPfFHnPWrIsfs41eOkbYs79QqmcZ+RC+2mHRBWmF0zt3bDy2Cvkii+yPSXnmbTYCM3uRhoNlX83kuwl6ZxnD33dYUerb2Q+fYdlCCwmK2ip2MjyysN2YYIZnV8d/dhHLIqOr2w1sgGZt1ZjpKlo/bS62XfyMSTS8Q3puLbAHrr0d71h2PGhRnQ38sAa2M1V0fxsnQuX80yV4PpGdjZczjOVgRNbp8PlPFMVOLFxcHQQnNg4ODoITmw9DSZXWy3THYx2/C3gqqddhh4ltg7Nz9Yl/WMClL1aDjvHnYita0Cy31D0mXUP3HuAugY9RmztkZ9NMXL8Y4ICXB/dG31WBKJY4uSujdkCOyPp/o7tREMCjgwxw0+3CxhvmqD0KRZZ9se2j+J+JRydSbcXW3vmZ1OMvL6IRGyj6INNbXhcSGt6WNuRYqt5vwF2NqsR0dRdrBYxvnawWRJMtpijs+nWYmsrP1t1/BWscjVFb6YXgD76T9yLGBoMFHm1GLFJ+cd4VGxaGLBwHhwNR+BYvEiGzcTGz8K16RYit3IvM4zd+Ah5tCYq5b/SspmEjTtXwr2fFvPdctxWvGb7Uyrepjp82d4fVguDRV2iWGreyckLwNEpdBmxySvStEt+tqpwrLfpDSef2/iclY+05z6wNZiGl0QcCr1abGRr5h9jIpsOhp9OwOcjrjBx3ofP5ARvHtnqUZiQgJySUuS82QtXTQusiyITMd2LtDDmQgIKC5IRuMEOGnqTcDIsFbkpL/DrQA0M3B3LmB8V+8eKcHu8HkZeyG72egNhyR246w/DuSyui0pn0+2rkd/tZwtZCHPj+Qhiu9E1JB6AkyEVmzKvlqJqJBHbmUzw6xPx+0gDDNv7CaUfFVQjmawzunALKGrW2ZZS93k7Bhj+xAiecU7vsyfb8QSVyvxjdck46mQAr6fsHxHDe4PFFnbYFtO0pRydRLcTW5v72fxHQ2/Q4SYP2lexKfNqfUNs5Gtdwm8YaeCMPdfWNYlNyPuCi8tc0YdWF3/Ugq66Osb5F0IgJTZ+6jE467rhAZNElI/M084wpJYYElEVblM1WYajAaY9kxZbKJZa2OJXTmydTrePbJTv8bNVvpgBI4vVTdlfJCObYq+WrH9MWmxk1+LLXicYGJlA24CKjUShiyOg138zgvLqICCR7YKrrnyxpR3HUAmxZZ0ZKhKbUMk2kfXfGK2LMVfzm/exLHsID4MhOJXOVSM7m24ltvbwswmKHmCWgQ7G7XuFtKJcfLgwA2Z6ojZbjSKvFmm1SfvHSuqlxUYiWVUEfulDIo8OK7YLrtC124yXmeWoqU7/E2JTtk21iN7QF31XRbC2IBF1MVsxwGIRQiXvmnB0Cj0isn0fjSh8sR2edvTuojrM7aygbTgHwbS9pMirRZD1j+XLiI1IGcWP5sCMiWzkW3kkjkyzgx5b/dM2GoRVL8tk2mzKxKZsm3ghS2Bj5yu6k8pAXy/gBAvvJyhj2ngcnQknNgEPOcnpyCupQEVRGoL2j4Tl2PPN3vfXbaiJhq+dJZa9Kme6a4EXiY22VljFvAaPo7PhxFb9Dttcjdm3TGmi37h1uJnaXW8mNCLPfyqshuxHfD191Ru5cIw/A6651jXgxNbT4Bfjy+dCpgcLvzgWMd9+dzlHB8GJjYOjg+DExsHRQXBi64II60tRUMX5YuTz7Xx3XZUeJbY/42fjp5/GeFNXHFP6Ct+OpBoftg2C3co339lTXzY/WM9A+gW6bUw7+hSreVV4X9gDxPZn/WzCyg84v/sPvC3vGqclP/sK3E1H4DR9lS7vDZZbiJ7J0aJrMQQ/bbyI96Xfinry84Mpou7zXozQ+7oeI9uxWH3uIyraeZc05l3BaHad0sX9QTk7lTRtLTb2pbVjb6FY2Jo8d62Dn3EaI0w8cTqjG4utc/xs7QV1Vw+GxU8PRR2NmReKWmBtUD7KinKQGHYD2ycYQtN2LV4xbztVhPz8YIqgb2LuY/gTHmaXoTg7HiFnF6CvuhnWhH1fbP0mjTUozs1Bbk4GIvY4QGfYcXzMot9zUVKn6Cl8e4pNTp/XNoJ2VHA29ui+YmsLP5ug8DrG6rrgYjaNFoq9bbUxezHZ1rDpeZz9tEOIbIqGdUi95YPxFr2Ycf09duBFvugsl5fTS3FesQycHW6AyXeKyJYQmr29V4SQ9x7bbXvBgT0hWpMfTP60rNhM5iFErC1+Co479cbw0xlMu0jRfPWp17ByKPuWZMNROBQrOkXl5zdrQMqJUSRq+iCqWnKYzsFH+snB0B91FQXiXcrPw7Ptk2GnSZatYQG39QFIYxYvKbbm+e4Ue/3I+s54w8mUJgsRLe9rvj1psUnnuaOTKDhejQUI9BkNW13R9JZzAlFa8gxLben6yW8Gg7HiaipznBixaWpBd4ALTGeraH62ZmJT4m2jr542tl6Np6l5yI59iM0OGhiw4zOzI+ti92Kwli1W+39EZlokzs00hcH4802vrG6e06tBcV6xqteYZ2qPPbHs+63liI2x3OztD202aUPL84MpmlZabHyURh7AKB1rbGC7gcmfj4eQ+cawXnwPGVXVKM1IRG41WYvC/GZ8FAZuwezlF5Ha0CgxLFpnc7HxkXFuLAzMZ+F8ZBoyY/yxipzAzvvjyP4Wi01OvjuF/kPRPGY/3UQiiaTJr/dhjA6bb09GbNJ57r6dB27U6U/IL8pFenYVBPxSJMZloLgsHx9OTYKR/k94Wi5kI9sUnEzl4Vh0cfesRn6vn01SbIq9bSLRfH3POx9pJ8jJMeYGCgV1iPHtCyOPe6zHjIzNPI3h2qKMojLvh1eSV6y+yB/j9FxxmSqAIldsAuT9cwS0+24FkyhUAqX5waT4Oq1IbFbkSqylrQ1dJuPoDzD0OIdkqeVTvs5Xg7drLWAwYg+CcuqYk52iLL+ZYqTExk/HKWctuJ4V7yPyf+5OJpGQ/meRcGTz3SnzH0pVPSXy7YmTQyqsRrYmD5w0ZQ8xRd8Jx1OIcLtjNbJt/WySYuMr8bZJi02I4oCxopO5sQqvZxqgr887cv1kISLxNrDGZiISGbEpySvGo9tCxPbPPLYupSCyxe22YyNbK/KDkVNF/rRsZCNttnupBcjPy0RChD98XbRhufgFyoSK5xOUv8PZ5a4w66UD5wUn8Z5Uq5XlN1OMlNjIPtpkY9Bsnpq3P5NtpB26qXDk5btT5j+UEhuZVpxvj2bDUSq21uSBI9SnB2DDeHLxpRctLfpaC1EVvtu32cR8j59NMrIp9rbJiu3rySwvsv0BF60hCiKbkrxiRFwzjQfiUCKrdjliE1ZFwrefOgbsJFXY1uQHUzKtTJuNbFnh9VHQsd2OL2WK5xNTn/MMvo4asP3lA6qV5DdTjJzINoREkyYHBbm43Z0EQ4nIJpvvTpn/UFZsX0UlKTY5PsXW5IETliFwmj7ZtjtIqxZAUPIQXoZOIrFlnCJVXncS5Wq6h9jaxc8mITZl3jbFYiNtti974ETabGtuxiArIwrnmTbbOYVphhTmFeMn49hgI/z0pIysgcCIzRwrn2UgPycNn19fxuYxetDouxovaGqk1uQHyw9VPC0T2WbgQWYxinLTERt0Hivte8GYNvh5itZB2mDREYjLrwSvLAFXvQxguTQM1Qrzm9F22i+YufQC22YTD9M/KqfNdnYM9Emb7UJUOrJIm201abMN2Rsr0WYjwpHKd6fY69dSscnxKfJbkQeOiO2xpy5pxwYgqbQatYUPmsSGiqeYYWIBzytfsDc4sftGtu+h2Q0SJd42ZWKjdyPTAnwwjrkb2Rt2Hjub7kbKio2gKK8YWQ59Q5b1otdgDh8vFCsknrNpmzliqs9ZRJWIlk2F2/L8YBUKp6XP2VzZbWHWYzIAk1afwfsyuk0K1lFXgeA15CRlflOHpesq+KeJ/qT8/GZ/4m7kjsmwpXnifrTA+A0BSGfqds2F0yzfnUKvX0vFRpYn7VMsJz+2NA8cOS+q485ikZNofpom2chuFvzpSUK2Lfr3GbAdSO9G7lZNsTWjC3jbGpKPwtXMA7fy2ZskHD0Grm+kJF3B20aqIq+XW6O/T3iz9z9ydH84sXVBBBWJiMkSJcfg6DlwYuPg6CA4sXFwdBCc2LognJ9NGZyfTS4dLTbOzyYJ52f7U3B+tm/D+dkk4fxsLad5DxLOz6YEzs8mD3l9IxUj7hvJ+dnk9I1sIzg/G6F5DxLOz8bA+dlEhfOzcX42zs9Gxcb52ZrR1tPJg/OzfYXzs3F+tm/SGrFxfjbOz8b52eTQHmKTB+dn4/xsNLJxfrYW0NLpOD8b52fj/GwKaOvp2oNmN0g4PxtTOD8b52drfzg/G0c7wvWNlITzs3G0I5zYuiCcn61nwomNg6OD4MTGwdFBcGLrZPgV+ajowBsw3QphPQpjgvG2oGfsoB4ltj/jZ+tUGpJxcrQVvO8Wfp/vrB09WJ3Kt7pDfS+Ntajht0fLWL6XsMeI7c/62ToPIUoD58DKYTs+1QJ1MdvhxNwFpUUD5oPcsfZkML6df741Hiw+Ms67M73xRevRRl/XefgtpAjt/aCh8pkn091LtF7J4ozT9Om/PNpabIICXB+lhSFHU8Cv+4SdDpZYHtbW93wVewm7vdi6rZ+tMQ833Iwx9kIW0yWJ9uKwMfDCg+xylOSn4N29/fC26gWL2aLeEYqR059PIewD3FGXkVpajNykCNxYNwha+tPxsOi7Yus3EdaVIC8nB7nZX3BhRG/Ybw1BOv2eW4RqRUpvT7HVfoSvrUW7iE1RJ/BuLba28LMJK0KwZbQNDJmrrDosXBbh9PsKURWAn4Vr0y1EV+ReZhi78RHy6A6U42MqSGmNt4ust+QePA1FzgAKIzamoy3zlaEh+ThG9DbFyjf0ZKtH/JGxMGd65WvAdvIevGEMpFRs0h4sRdOKxKY//i5K2dqTsCgAbpr9sIOxECiaj4+8x5sw3kKdWYfeoPWIZM5RASo//IHFLmbMPjJ1ob1IyHLIheTWNGNYzXuMkgaJYbooYSnujdeG46FEsjUiBKXhODrTQXQMjIdhxYUvENnQJMTWWIjA5TYw97yINDqjQk9gLu4uc4a1Dv0PpJgMx9qbGeSf0RVJic2GnYb+J3IO0V2v8HhVhmOXux2Mmen1MOVKFirfttxLSHvEPNrhBbtBLjCdu7dzxSavSNNufjZtB+wLz0Bu+gfc3jQEOkaz8YTpPkUa6AkJyCkpRc6bvXDVtMC6qBr2JJD0MRUguFXeLiFqP2xCf8tliBD1H5IrNjTm4rKrBvoxHWMFqM6KR0peKUrSHmOjrQYcD1KvliiyNfdgKZpWSmyCSsSd82S2KZDpRa1gPnJibrU1xNRLCSivLkdOUjqqyGqEFUFYZaGLsfuDkJ4XC/9FFjBwu0IicSUi98/GoqMfUS2UGKb/SVpsgkI8mGkIowmHEJScifjHW+CibQ2fcLIjxGJ7ko+438fD3GEDgkWK+qbHbPS5LyRqpiHij6kw0fPEPRq5ZSKbOZYGV4BP9lujQPnxEp0nA7A7NAtF+enIqGhshZeQ9edZz8PuoFTseRraeWL7HtrSz8ZQ+wG+fXXheb+E7CQJ+Jk456ILt4AiCGWqN633dvFeecPMYS/i2VFyxYZKPPfSgvGCEKneJHX4ssMO5rNfkd+/VY2UnFYkNhrBdXU02Z4yP2LUgQ+iSNIMifnqE3BwkCYcNzxEajU92UXwgubC1GwpxDWx+thdGEiqws9ku91/RUpswqLbmKxL9tFn8dZX4c0SU5gvJP+Z2c+acFo6HbZmU3E5ld1ZrfGYVQVhoQkR4ntykfxGNVLZ8ZI5T6RQ6iVk/XnDz2YgurOrka2h/fxs7E4kB+TGKG24nExHA+8LLi5zRR9aJflRC7rkJB3nXwiBjNjIbK30dtEOyqYD9yOBrUvJj2zZuCSObIJSRPjNwlAzau3/EXq9f4ABU/WRIzaF07JttpEXkZBfgPysZEQ/2IdJBvrwup5Lru6K5hOCF38dmyZYQkvTDt4HXqGQL2T8f83/Gym9xsC/qTexHKTExk/+DUO0R8O/UDwP2cbDZBvHBaC4nu5nskytH6A9dA/eVbJXhNZ4zGqjsbkfFRWJet8Qm7LjJSu2VngJWX+e94uKzm+zfS9t5WdjqPuCXXY6mHy3ENkXR0Cv/2YE5dVBQCLbBVddhWIT01JvV83bdbC1WYO3rC9MntjqE/3goiFqs9XH74Wj7nD4vSsBX1iLz7vtYcYIQdaDpXha2TYbjZ6vvPVgtjgUpQrnE8NHScRBjNMxwIJX5ILxahZMbcgJ9tVu921kIlsAJunaYqdEZAtZbAJzGs3Z/Tz51hscG6dLtuW66ARujcdMUlSSYquLwTZbE8yX2OECJcdL5jxpjZeQ9ecNP9ONIlu7+dl6m2LBhXAkZ6Ug9PgUmOjTXvf1yLngCl27zXiZWY6a6nQlYmutt4se9xuYYOCKyzmig8eITd8Tt1PykZsRhzD/nfAy/wFmM/2RQw5afdxuDNIZjiOReaiqqUTM7gFNApL2YOV9VjwtE9lGXUZKUSHyMhMQcWMTRmppYuLlbFQrWkdjKeIiPyG7jIfKzEekaqWDqQ9LISh7gSVmehi3+xFis0ikzPiCjykkCggrELl3Fub7kXak5DD9o/LabN6kzTbxMIJTspDw2Je02azgE1bZrLreWPQEy8h6x51MYtzVLfaYKRJbYx6ujtZEv9UPkJiTRo5LARqUHS8ZsbXCS1hRJ/LnkTbbnuA07O2ubbbvhdmJGppwcBC9UUvbZiJ2Pitg2gKC8kgcmWbHerbIOKNBWPWyTLbNRk6o1nm7yAh+Bs64GsMjQPRAu+7TDokqTC+Y2rth5bFXyBVfZBsL8XyrG/pQfxedRssUI33fk9YiWZS0B6u0QMG09DnbBPaOGi3qMLYdjSV+r8F00lC0DnLC7nJl77SqG8B5vvitVQJURJ/CoqHGonG9zOB+JA51jfkImGYES+ZupMQw/aPSYiM0uxtpNFT+3UiyrpJni2GpMw7n6R3clnrMFImNLK88bBcmmNH51dGPfcSi6HjJiI1sfcu9hOQo0buRO71gS+9GzpG8G/kQ/x8HHWNP4FxomAAAAABJRU5ErkJggg==" title="捕获" alt="捕获" data-path="images/-.PNG" data-linkid="捕获" style="width:auto;max-width:90%">
+</p>
+<p class="p noindent">其中最重要的是parse这个抽象方法，该方法由子类具体实现，定制自己的解析规则。
+</p>
+<p class="p indent">这里先忽略各种Parser的具体实现，转而回到ExecuteQuery.cc的executeQuery方法
+</p><h2 id="sec-executequerycc" class="h1" data-heading-depth="1" style="display:block"><a href="#sec-executequerycc" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">3</span>.&#8194;</span>回到ExecuteQuery.cc</h2>
+<div class="framed" style="border:solid black 1px">
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>  .....
+ DataBase::ParseQuery parser;
+    try {
+        //sql分析为抽象语法树
+    std::shared_ptr&lt;DataBase::IAST&gt; ast =  ParseUtil::parseQuery(parser,begin,end,&quot;&quot;);
+    if(ast) {
+       wbuf.write(begin, (end - begin));
+    }
+    } catch(...) {
+        currentExceptionLog();
+        throw;
+    }</code></pre></div>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>可以看到，该类定义了ParserQuery，而该类是IParser的继承类，用于解析Tokens
+然后该对象作为参数传入ParserUtil::parseQuery。
+paserQuery方法部分片段如下：</code></pre>
+<div class="framed" style="border:solid black 1px">
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>std::shared_ptr&lt; DataBase::IAST &gt; ParseUtil::tryParseQuery
+          (DataBase::IParser&amp; parser, const char*&amp; pos, const char* end,
+             std::string&amp; out_error_message, bool hilite,
+              const std::string&amp; description)
+{
+    //用查询字符串的开始和结束初始化词法分析
+    const char* begin = pos;
+    DataBase::Tokens tokens(pos,end);
+    //tokens迭代器
+    DataBase::TokenIterator it(tokens);
+    //如果当前token已经指向EndOfStream或者 ; 那么就表示查询结束, 
+  //也就是说查询字符串没内容或者只有一个;
+    if (it-&gt;isEnd()
+            || it-&gt;type == DataBase::TokenType::Semicolon)
+    {
+        out_error_message = &quot;Empty query&quot;;
+        return nullptr;
+    }
+
+    DataBase::Expected expected;
+    std::shared_ptr&lt;DataBase::IAST&gt; res;
+    //尝试使用传入的解析器解析tokens, 生成语法树
+    bool parse_res = parser.parse(it, res, expected);
+    //获得解析后的最后一个token
+    DataBase::Token last_token = it.max();
+    //如果最后一个token是错误的,那么就获取对应错误token的描述信息,
+  //并写入out_error_message返回
+    if (last_token.isError())
+    {
+        out_error_message = getLexicalErrorMessage(pos, end, last_token,
+                                hilite, description);
+        return nullptr;
+    }
+    if(!parse_res){
+          throw Poco::Exception(&quot;Unrecognized SQL ===&gt;&quot; + std::string(begin,end));
+    }
+    return res;
+}</code></pre></div>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>从代码中可以看到，该方法主要是先构造了Tokens，然后调用了传入parser的parse方法解析抽象语法树，
+到此程序结构就明朗起来了。下面关注一下传入的ParserQuery的实现：</code></pre>
+<div class="framed" style="border:solid black 1px">
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>bool DataBase::ParseQuery::parseImpl(DataBase::TokenIterator&amp; pos, 
+              std::shared_ptr&lt; DataBase::IAST &gt;&amp; node, DataBase::Expected&amp; expected)
+{
+    //这里当前只实现了use查询解析,
+    //之后可以添加新的类型解析, 一项项尝试解析,
+    //如果所有都解析结果都不符合,那么认为传入的查询字符串是错误的
+    DataBase::ParserUseQuery useQuery;
+    return useQuery.parse(pos,node,expected);
+}
+</code></pre></div>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>很简单，只是构建了一个ParserUseQuery，并且ParserUseQuery的返回作为该parser的返回
+这里后续还会加上select查询解析，insert查询解析，create查询解析等等
+下面再来看看ParserUseQuery：</code></pre>
+<div class="framed" style="border:solid black 1px">
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>bool ParserUseQuery::parseImpl(TokenIterator&amp; pos, 
+                      std::shared_ptr&lt; IAST &gt;&amp; node, Expected&amp; expected)
+{
+    //保存起始位置
+    TokenIterator begin = pos;
+    //初始化关键字Parser, Use Query的关键字是USE
+    KeywordParser s_use(&quot;USE&quot;);
+    //标识符解析
+    IdentifierParser name_p;
+    std::shared_ptr&lt;IAST&gt; database;
+
+    if (!s_use.ignore(pos, expected))
+        return false;
+
+    if (!name_p.parse(pos, database, expected))
+        return false;
+
+    auto query = std::make_shared&lt;ASTUseQuery&gt;(StringRange(begin, pos));
+    query-&gt;database = typeid_cast&lt;ASTIdentifier &amp;&gt;(*database).name;
+    node = query;
+    return true;
+}</code></pre></div>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>可以看到，use查询解析只是简单地先查找use关键字，然后解析接在关键字之后的标记符，
+并将该标记符作为ASTUseQuery这个抽象语法树的database属性，构造了ASTUseQuery语法树</code></pre><h2 id="section" class="h1" data-heading-depth="1" style="display:block"><a href="#section" class="entity-anchor localref">#</a><span class="heading-before"><span class="heading-label">4</span>.&#8194;</span>其他说明</h2>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>以上描述仅仅是一部分，具体内容可以参考stage/stage.version.1.3.tar.gz
+stage目录下的内容是分阶段打包源码包（除了contrib的第三方源码目录外）</code></pre>
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>关于SSE指令：
+由于SSE指令一次能处理16个字节，因此可以用该指令达到操作性能上的提升。
+以FindSymbol.h为例：
+该类主要用于从一个字符串中搜索第一次出现的字符，使用SSE指令加速后，一次可以直接搜索16个字符
+因此，对于长字符串来说，SSE大大加快了搜索速度，具体指令解释在代码中都有较为详实的说明，不再解释</code></pre>
+<div class="framed" style="border:solid black 1px">
+<pre class="para-block pre-fenced pre-fenced3" style="display:block"><code>#pragma once
+
+#include &lt;cstdint&gt;
+
+#ifdef __SSE2__
+#include &lt;emmintrin.h&gt;
+#endif
+
+#ifdef __SSE4_2__
+#include &lt;nmmintrin.h&gt;
+#endif
+
+
+namespace detail
+{
+
+template &lt;char s0&gt;
+inline bool is_in(char x)
+{
+    return x == s0;
+}
+
+template &lt;char s0, char s1, char... tail&gt;
+inline bool is_in(char x)
+{
+    return x == s0 || is_in&lt;s1, tail...&gt;(x);
+}
+
+#if __SSE2__
+template &lt;char s0&gt;
+inline __m128i mm_is_in(__m128i bytes)
+{
+    //_mm_set1_epi8 返回一个__m128i , 返回值的16个字节均被设置为s0
+    //_mm_cmpeq_epi8 的返回值:
+    //     r0 := (a0 == b0) ? 0xff : 0x0
+    // r1 := (a1 == b1) ? 0xff : 0x0
+    // ...
+    // r15 := (a15 == b15) ? 0xff : 0x0
+    // 也就是说,如果bytes中包含字符s0,那么对应的位置置为全1
+    __m128i eq0 = _mm_cmpeq_epi8(bytes, _mm_set1_epi8(s0));
+    return eq0;
+}
+
+template &lt;char s0, char s1, char... tail&gt;
+inline __m128i mm_is_in(__m128i bytes)
+{
+    //搜索第一个字符,如果存在其中,那么eq0对应的位置就为0xff
+    __m128i eq0 = _mm_cmpeq_epi8(bytes, _mm_set1_epi8(s0));
+    __m128i eq = mm_is_in&lt;s1, tail...&gt;(bytes);
+    //最后或操作后,就是在bytes中找到对于字符的位置都会被置为0xff, 总共16个字符
+    return _mm_or_si128(eq0, eq);
+}
+#endif
+
+
+template &lt;char... symbols&gt;
+inline const char * find_first_symbols_sse2(const char * begin, const char * end)
+{
+#if __SSE2__
+    //一次处理16个字节
+    for (; begin + 15 &lt; end; begin += 16)
+    {
+        //将begin指针指向的16个字节强制转化并加载到bytes中
+        __m128i bytes = _mm_loadu_si128(reinterpret_cast&lt;const __m128i *&gt;(begin));
+
+        //获取symbols在bytes中的位置
+        __m128i eq = mm_is_in&lt;symbols...&gt;(bytes);
+
+        //返回一个16bit整数
+     // r=(_A15[7] &lt;&lt; 15) | (_A14[7] &lt;&lt; 14) ... (_A1[7] &lt;&lt; 1) | _A0[7],   
+        //也就是返回每个8bit位置的最高位,组成一个16位的数字
+        // 注意, _mm_movemask_epi8刚好逆序
+        //举个例子:  
+        //   假设bytes = &quot;abcdefghijklmnop&quot;  ,  symbols = &#39;h&#39;, &#39;o&#39;
+        //那么经过计算, eq = 0x00_00_00_00_00_00_00_ff_00_00_00_00_00_00_ff_00
+        // 经过下列函数计算后, bit_mask = 0100000010000000B  
+    // 也就是说,末尾的0有7个,刚好就是h相对于a的偏移
+        uint16_t bit_mask = _mm_movemask_epi8(eq);
+        if (bit_mask)
+            //__builtin_ctz返回bit_mask末尾0的个数
+            return begin + __builtin_ctz(bit_mask);
+    }
+#endif
+    //剩余非16个字符,依次计算
+    for (; begin &lt; end; ++begin)
+        if (is_in&lt;symbols...&gt;(*begin))
+            return begin;
+    return end;
+}
+
+
+template &lt;size_t num_chars,
+         char c01,     char c02 = 0, char c03 = 0, char c04 = 0,
+         char c05 = 0, char c06 = 0, char c07 = 0, char c08 = 0,
+         char c09 = 0, char c10 = 0, char c11 = 0, char c12 = 0,
+         char c13 = 0, char c14 = 0, char c15 = 0, char c16 = 0&gt;
+inline const char * find_first_symbols_sse42_impl(const char * begin, 
+                                                   const char * end)
+{
+#if __SSE4_2__
+//定义模式, 无符号8bit, 任意相等模式,  设置和_SIDD_BIT_MASK相同bit (以bit形式返回)
+#define MODE (_SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_ANY | _SIDD_LEAST_SIGNIFICANT)
+    //反序加载要查找的字符,也就是高位默认为0
+    __m128i set = _mm_setr_epi8(c01, c02, c03, c04, c05, c06, c07, 
+                          c08, c09, c10, c11, c12, c13, c14, c15, c16);
+
+    for (; begin + 15 &lt; end; begin += 16)
+    {
+        //加载要比较的字符,16字节
+        __m128i bytes = _mm_loadu_si128(reinterpret_cast&lt;const __m128i *&gt;(begin));
+        //参数含义:   set: 待查找的字符
+        //                      num_chars : 待查找的字符个数
+        //                     bytes:  在哪里查找
+        //                    16:    被查找的字符始终都是16字节的
+        //                    比较模式:    _SIDD_UBYTE_OPS  无符号8bit字符
+        //                    _SIDD_CMP_EQUAL_ANY             任意相等模式(也就是查找)
+        //            _SIDD_LEAST_SIGNIFICANT      最右边bit为1的就返回对于的index
+        if (_mm_cmpestrc(set, num_chars, bytes, 16, MODE))
+            return begin + _mm_cmpestri(set, num_chars, bytes, 16, MODE);
+    }
+#undef MODE
+#endif
+
+    for (; begin &lt; end; ++begin)
+        if (   (num_chars &gt;= 1 &amp;&amp; *begin == c01)
+                || (num_chars &gt;= 2 &amp;&amp; *begin == c02)
+                || (num_chars &gt;= 3 &amp;&amp; *begin == c03)
+                || (num_chars &gt;= 4 &amp;&amp; *begin == c04)
+                || (num_chars &gt;= 5 &amp;&amp; *begin == c05)
+                || (num_chars &gt;= 6 &amp;&amp; *begin == c06)
+                || (num_chars &gt;= 7 &amp;&amp; *begin == c07)
+                || (num_chars &gt;= 8 &amp;&amp; *begin == c08)
+                || (num_chars &gt;= 9 &amp;&amp; *begin == c09)
+                || (num_chars &gt;= 10 &amp;&amp; *begin == c10)
+                || (num_chars &gt;= 11 &amp;&amp; *begin == c11)
+                || (num_chars &gt;= 12 &amp;&amp; *begin == c12)
+                || (num_chars &gt;= 13 &amp;&amp; *begin == c13)
+                || (num_chars &gt;= 14 &amp;&amp; *begin == c14)
+                || (num_chars &gt;= 15 &amp;&amp; *begin == c15)
+                || (num_chars &gt;= 16 &amp;&amp; *begin == c16))
+            return begin;
+    return end;
+}
+
+
+template &lt;char... symbols&gt;
+inline const char * find_first_symbols_sse42(const char * begin, const char * end)
+{
+    return find_first_symbols_sse42_impl&lt;sizeof...(symbols), symbols...&gt;(begin, end);
+}
+
+}
+
+
+
+//通过sse指令来快速搜索首个匹配的字符
+template &lt;char... symbols&gt;
+inline const char * find_first_symbols(const char * begin, const char * end)
+{
+#if __SSE4_2__
+    //如果要查找的字符超过了5个,那么走SSE4_2
+    if (sizeof...(symbols) &gt;= 5)
+        return detail::find_first_symbols_sse42&lt;symbols...&gt;(begin, end);
+    else
+#endif
+        return detail::find_first_symbols_sse2&lt;symbols...&gt;(begin, end);
+}
+</code></pre></div></div><span data-line=""></span></div>
+</body>
+<script type="text/javascript">
+  // ---------------------------------------------
+      // Classname helpers
+      // ---------------------------------------------
+      function hasClassName(elem,cname) {
+        if (elem==null) return false;
+        var regex = new RegExp("\\s*\\b" + cname + "\\b","g");
+        return regex.test(elem.className);
+      }
+      
+      function removeClassName(elem,cname) {
+        var regex = new RegExp("\\s*\\b" + cname + "\\b","g");
+        elem.className = elem.className.replace( regex, "" );
+      }
+      
+      function addClassName(elem,cname) {
+        if (!hasClassName(elem,cname)) elem.className = elem.className + " " + cname;
+      }
+      
+      function toggleClassName(elem,cname) {
+        var regex = new RegExp("\\s*\\b" + cname + "\\b","g");
+        var classes = elem.className;
+        if (regex.test(classes)) {
+          elem.className = classes.replace( regex, "" );
+          return false;
+        }
+        else {
+          elem.className = classes + " " + cname;
+          return true;
+        }
+      }
+      
+      // ---------------------------------------------
+      // Reliable offset determination
+      // ---------------------------------------------
+      
+      function getWindowOffset(elem) {
+        var box;
+        if (elem.getBoundingClientRect) {
+          box = elem.getBoundingClientRect();
+        }
+        else if (elem.offsetParent && elem.offsetParent.getBoundingClientRect) {
+          // text node
+          box = elem.offsetParent.getBoundingClientRect();
+          box.top = box.top + elem.offsetTop;
+          box.left = box.left + elem.offsetLeft;
+        }
+        else {
+          box = { top: 0, left : 0 };
+        }
+        return box;
+      }
+      
+      // Return the viewport position: -1 (before), 0 (visible), 1 (after)
+      function viewportPosition(elem) {
+        var pos = getWindowOffset(elem)
+        if (pos.top < 0 || pos.left < 0) 
+          return -1;
+        else if (pos.top > (window.innerHeight || document.documentElement.clientHeight) ||
+                 pos.left > (window.innerWidth || document.documentElement.clientWidth)) 
+          return 1;
+        else 
+          return 0;
+      }
+      
+      // ---------------------------------------------
+      // Expand the toc sections and align headers with the toc.
+      // ---------------------------------------------
+      
+      var side = document.getElementsByClassName("sidepanel")[0];
+      var afterScroll = null;
+      
+      // Align a heading at the top of the page with the toc
+      function alignHeading( elem ) {
+        var ofs     = getWindowOffset(elem).top;
+        var sideofs = getWindowOffset(side).top;
+        if (ofs >= 0 && ofs < sideofs) {
+          window.scrollBy(0, ofs - sideofs);
+        } 
+      }
+      
+      // Expand, or unexpand, one toc item
+      // The class is 'auto-expands' or 'click-expands'; the latter is sticky
+      // as it is user induced and will not be automatically unexpanded.
+      function itemExpand(item,cls,expand) {
+        // get possible toc block (that follows the item)
+        var tocblock = item.nextElementSibling;
+        if (tocblock==null || !hasClassName(tocblock,"tocblock")) return;
+       
+        // set expand class
+        if (expand===undefined) expand = !hasClassName(tocblock,"expands");
+        if (cls===undefined) cls = "auto-expands" 
+        if (cls==="click-expands") removeClassName(tocblock,"auto-expands");
+        if (expand && !hasClassName(tocblock,cls)) {
+          toggleClassName(tocblock,cls); 
+        }
+        else if (!expand && hasClassName(tocblock,cls)) {
+          toggleClassName(tocblock,cls);
+          item.firstElementChild.className = "unexpanded";
+        }
+        
+        // set expansion icon
+        if (hasClassName(tocblock,"auto-expands") || hasClassName(tocblock,"click-expands")) {
+          item.firstElementChild.className = "expanded";   
+        }
+        else {
+          item.firstElementChild.className = "unexpanded";
+        }
+      }
+      
+      // Expand a single item in the toc (and unexpand others).
+      function itemExpandOne(item) {
+        // unexpand anything that was expanded
+        [].forEach.call( document.querySelectorAll(".tocitem"), function(item) {
+          removeClassName(item,"current");
+          itemExpand(item,"auto-expands",false);      
+        });
+        addClassName(item,"current");
+        // expand the chain of parent blocks
+        var tocblock = null;
+        var toc = item.nextElementSibling;
+        if (toc && hasClassName(toc,"tocblock")) { 
+          tocblock = toc;
+        }
+        else {
+          tocblock = item.parentElement;
+        }
+        while(tocblock != null && !hasClassName(tocblock,"toc")) {
+          if (hasClassName(tocblock,"tocblock")) {
+            item = tocblock.previousElementSibling;
+            if (item != null) itemExpand(item,"auto-expands",true);
+          }
+          tocblock = tocblock.parentElement;
+        }
+      }
+      
+      // Auto expand the toc at current  position in the document 
+      function expandToc() {
+        // find the first section heading that is visible in the viewport 
+        var current = null;
+        [].every.call( document.querySelectorAll(".tocitem"), function(item) {
+          var target = document.getElementById( item.getAttribute("data-toc-target") );
+          var pos = viewportPosition(target);
+          if (pos <= 0) current = item;
+          return (pos < 0);
+        });
+        // if found, expand the corresponding item
+        if (current != null) itemExpandOne(current);
+      }
+      
+      document.addEventListener("load", function(ev) { expandToc(); });
+      document.addEventListener("resize", function(ev) { expandToc(); });
+      
+      // fire at end of scrolling
+      var scrollHandler = null;
+      document.addEventListener("scroll", function(ev) {
+        if (scrollHandler) clearTimeout(scrollHandler);
+        scrollHandler = setTimeout( function() {
+          scrollHandler = null;
+          if (afterScroll) {
+            afterScroll();
+            afterScroll = null;
+          }
+          else {
+            expandToc();
+          }
+        }, 50 );
+      });
+      
+      // ---------------------------------------------
+      // Install event handlers for all items in the TOC
+      // ---------------------------------------------
+      [].forEach.call( document.querySelectorAll(".tocitem"), function(item) {
+        // only for toc items with a target
+        var target = document.getElementById( item.getAttribute("data-toc-target") );
+        if (!target) return;
+        
+        // ensure every tocblock has a expansion icon in front
+        // (the optional nested tocblock follows the item)
+        var tocblock = null;
+        var toc = item.nextElementSibling;  
+        if (toc && hasClassName(toc,"tocblock")) { 
+          tocblock = toc;
+          item.innerHTML = "<span class='unexpanded'></span>" + item.innerHTML;   
+        } 
+        
+        // on a click
+        item.addEventListener( "click", function() {
+          // expand this toc item and set expansion icon
+          itemExpand(item,"click-expands");
+          // after navigation, align the heading with the toc
+          afterScroll = (function() {
+            alignHeading(target);
+          });    
+        }); 
+      });
+</script>
+
+</html>
