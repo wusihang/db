@@ -4,6 +4,8 @@
 
 namespace DataBase {
 
-void executeQuery(IO::ReadBuffer& ibuf , IO::WriteBuffer& wbuf);
+class Context;
+
+void executeQuery(IO::ReadBuffer& ibuf , IO::WriteBuffer& wbuf, Context& context);
 
 }

@@ -2,6 +2,7 @@
 #include<Poco/Net/HTTPServerRequest.h>
 #include<Poco/Net/HTTPServerResponse.h>
 #include<CommonUtil/HttpUtil.h>
+#include<CommonUtil/LoggerUtil.h>
 #include<string>
 
 void PingRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
@@ -15,6 +16,7 @@ void PingRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Po
     }
     catch (...)
     {
+		DataBase::currentExceptionLog();
     }
 }
 

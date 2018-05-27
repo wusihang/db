@@ -73,6 +73,12 @@ void readIntText(T & x, ReadBuffer & buf)
 }
 
 template <typename T>
+bool tryReadIntText(T & x, ReadBuffer & buf)
+{
+    return readIntTextImpl<T, bool>(x, buf);
+}
+
+template <typename T>
 inline typename std::enable_if<std::is_integral<T>::value, void>::type
 readText(T & x, ReadBuffer & buf) {
     readIntText(x, buf);

@@ -2,7 +2,7 @@
 #include<Poco/Exception.h>
 #include<Poco/ErrorHandler.h>
 
-void currentExceptionLog()
+void DataBase::currentExceptionLog()
 {
     try {
         throw;

@@ -2,8 +2,11 @@
 #include<Parser/ParseQuery.h>
 #include<Parser/ParseUtil.h>
 #include<CommonUtil/LoggerUtil.h>
-
-void DataBase::executeQuery(IO::ReadBuffer& ibuf, IO::WriteBuffer& wbuf)
+#include<Interpreter/InterpreterFactory.h>
+#include<Interpreter/Context.h>
+#include<Interpreter/Context.h>
+#include<string>
+void DataBase::executeQuery(IO::ReadBuffer& ibuf, IO::WriteBuffer& wbuf,DataBase::Context& context)
 {
     const char* begin;
     const char* end;
@@ -19,14 +22,21 @@ void DataBase::executeQuery(IO::ReadBuffer& ibuf, IO::WriteBuffer& wbuf)
     // 	wbuf.write(begin, (end - begin));
     //...数据库处理逻辑待续...
     DataBase::ParseQuery parser;
+    std::shared_ptr<DataBase::IAST> ast;
     try {
-		//sql分析为抽象语法树
-        std::shared_ptr<DataBase::IAST> ast =  ParseUtil::parseQuery(parser,begin,end,"");
-        if(ast) {
-            wbuf.write(begin, (end - begin));
+        //sql分析为抽象语法树
+        ast =  ParseUtil::parseQuery(parser,begin,end,"");
+        if(ast->range.first < begin || ast->range.second > end) {
+            throw Poco::Exception("Unexpected behavior: AST chars range is not inside source range");
         }
     } catch(...) {
-		currentExceptionLog();
-		throw;
+        DataBase::currentExceptionLog();
+        throw;
     }
+//     std::string query(begin,(ast->range.second - begin));
+    auto interpreter  = DataBase::InterpreterFactory::get(ast,context);
+    interpreter -> execute();
 }
+
+
+

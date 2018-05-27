@@ -3,6 +3,9 @@ project(db)
 #cmake版本要求检查
 cmake_minimum_required(VERSION 3.2.0)
 
+#设置默认编译类型为Debug  , 该选项可选值为Debug Release RelWithDebInfo >和 MinSizeRel
+SET(CMAKE_BUILD_TYPE "Debug")
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # Require at least gcc 6
     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6 AND NOT CMAKE_VERSION VERSION_LESS 2.8.9)
@@ -30,6 +33,10 @@ option(NOT_UNBUNDLED "not to use system poco library" 1)
 #cc1: warning: command line option ‘-std=c++11’ is valid for C++/ObjC++ but not for C
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 message(STATUS "optional:-std=c++11")   
+
+#用于调试时禁止优化,生成完整的调试信息,该选项需要配合cmake -DCMAKE_BUILD_TYPE=Debug来执行
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall  -Wno-sign-compare -Wno-unused-function -g -ggdb")
+SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall -Wno-sign-compare -Wno-unused-function")
 
 #打印当前根目录路径（绝对路径）
 message("project root path is : " ${PROJECT_ROOT_PATH} )

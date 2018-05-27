@@ -2,7 +2,7 @@
 #include<Daemon/BaseDaemon.h>
 #include <IO/WriteBufferFromString.h>
 #include <IO/WriteBufferHelper.h>
-#include <CommonUtil/ThreadNumber.h>
+#include <CommonUtil/SystemUtil.h>
 #include <sys/time.h>
 
 const static std::string time_formatter = "%Y-%m-%d %H:%M:%S";
@@ -30,7 +30,7 @@ void DataBase::OwnPatternFormatter::format(const Poco::Message& msg, std::string
 
         writeCString(" [ ", wb);
         //获取当前线程号
-        IO::writeUIntText(ThreadUtil::ThreadNumber::get(), wb);
+        IO::writeUIntText(SystemUtil::getThreadNumber(), wb);
         writeCString(" ] <", wb);
 		//获取日志优先级
         IO::writeString(getPriorityName(static_cast<int>(msg.getPriority())), wb);

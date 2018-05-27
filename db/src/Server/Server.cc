@@ -31,11 +31,6 @@ int DataBase::Server::main(const std::vector< std::string >& args)
     Poco::Logger* log = &logger();
     static ServerErrorHandler error_handler;
     Poco::ErrorHandler::set(&error_handler);
-// 	try{
-// 	    throw Poco::Exception("111");
-// 	}catch(Poco::Exception& e){
-// 		Poco::ErrorHandler::handle(e);
-// 	}
     DataBase::registerFunctions();
     DataBase::registerAggregationFunctions();
 
@@ -99,7 +94,9 @@ int DataBase::Server::main(const std::vector< std::string >& args)
     //退出主函数时析构，即退出时调用
     SCOPE_EXIT( {
         LOG_INFO(log, "Shutting down storages.");
+		global_context->shutdown();
         LOG_DEBUG(log, "Shutted down storages.");
+		//释放指针
         global_context.reset();
         LOG_DEBUG(log, "Destroyed global context.");
     });
@@ -228,6 +225,8 @@ int DataBase::Server::main(const std::vector< std::string >& args)
             LOG_DEBUG( log, "Closed connections." << (current_connections ? " But " + std::to_string(current_connections) + " remains." " Tip: To increase wait time add to config: <shutdown_wait_unfinished>60</shutdown_wait_unfinished>" : ""));
         });
 
+		//添加session清理线程
+		DataBase::SessionCleaner session_cleaner(*global_context);
         //等待外部终止应用
         waitForTerminationRequest();
     }

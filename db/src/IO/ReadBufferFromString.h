@@ -1,3 +1,4 @@
+#pragma once
 #include<IO/ReadBufferFromMemory.h>
 
 namespace IO {

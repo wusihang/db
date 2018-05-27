@@ -27,7 +27,7 @@ public:
     }
 
     virtual std::string getAliasOrColumnName() const {
-        getColumnName();
+        return getColumnName();
     }
 
     virtual std::string tryGetAlias() const {

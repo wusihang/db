@@ -20,7 +20,8 @@ public:
         first = token_begin->begin;
         second = token_last->end;
     }
-private:
+    
+    
     const char* first;
     const char* second;
 };
