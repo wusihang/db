@@ -7,6 +7,7 @@
 #include<vector>
 #include<deque>
 #include<iostream>
+#include<DataBases/IDataBase.h>
 #include<CommonUtil/LoggerUtil.h>
 #include<CommonUtil/SystemUtil.h>
 namespace ErrorCodes
@@ -15,6 +16,8 @@ extern const int THERE_IS_NO_SESSION;
 extern const int UNKNOWN_DATABASE;
 extern const int LOGICAL_ERROR;
 extern const int SESSION_IS_LOCKED;
+extern const int DATABASE_ALREADY_EXISTS;
+extern const int DDL_GUARD_IS_ACTIVE;
 }
 
 namespace DataBase {
@@ -33,14 +36,33 @@ public:
 
 struct ContextShared {
     mutable Poco::Mutex mutex;
+    //ddl锁
+    mutable std::mutex ddl_guards_mutex;
+    std::unordered_map<std::string, DataBase::DDLGuard::Map> ddl_guards;
     using Sessions = std::unordered_map<Context::SessionKey, std::shared_ptr<Context>, SessionKeyHash>;
     using CloseTimes = std::deque<std::vector<Context::SessionKey> >;
+    //已经生成的session
     Sessions sessions;
+    //存储待释放的sessionKey
     CloseTimes close_times;
     std::chrono::steady_clock::duration close_interval = std::chrono::seconds(1);
+    //session清理检查次数 ,  每次等待closee_interval
     Poco::UInt64 close_cycle = 0;
+    //清除session的时间点
     std::chrono::steady_clock::time_point close_cycle_time = std::chrono::steady_clock::now();
-    bool shutdown_called = false;
+    bool shutdown_called = false;   //是否已经调用了shutdown
+
+    //目录信息
+    std::string path;          //数据目录,必须以/结尾
+    std::string tmp_path;   // 处理请求时的临时目录
+    std::string flags_path;  //存放flags的目录
+
+    //数据库信息
+    std::map<std::string, std::shared_ptr<IDataBase>> databases;
+
+    //默认应用类型
+    Context::ApplicationType application_type = Context::ApplicationType::SERVER;
+
     void shutdown() {
         if(shutdown_called) {
             return;
@@ -115,6 +137,23 @@ std::string DataBase::Context::getCurrentDatabase() const
     auto lock = getLock();
     return current_database;
 }
+
+const std::shared_ptr< DataBase::IDataBase > DataBase::Context::getDatabase(const std::string& database) const
+{
+    auto lock = getLock();
+    std::string  db = resolveDatabase(database, current_database);
+    assertDatabaseExists(db);
+    return shared->databases[db];
+}
+
+std::shared_ptr< DataBase::IDataBase > DataBase::Context::getDatabase(const std::string& database)
+{
+    auto lock = getLock();
+    std::string db = resolveDatabase(database, current_database);
+    assertDatabaseExists(db);
+    return shared->databases[db];
+}
+
 
 void DataBase::Context::assertDatabaseExists(const std::string& database_name, bool /*check_database_acccess_rights*/) const
 {
@@ -252,6 +291,65 @@ std::unique_lock< Poco::Mutex > DataBase::Context::getLock() const
     return std::unique_lock<Poco::Mutex>(shared->mutex);
 }
 
+std::string DataBase::Context::getFlagsPath() const
+{
+    auto lock = getLock();
+    return shared->flags_path;
+}
+std::string DataBase::Context::getPath() const
+{
+    auto lock = getLock();
+    return shared->path;
+}
+std::string DataBase::Context::getTemporaryPath() const
+{
+    auto lock = getLock();
+    return shared->tmp_path;
+}
+void DataBase::Context::setFlagsPath(const std::string& path)
+{
+    auto lock = getLock();
+    shared->flags_path = path;
+}
+void DataBase::Context::setPath(const std::string& path)
+{
+    auto lock = getLock();
+    shared->path = path;
+}
+void DataBase::Context::setTemporaryPath(const std::string& path)
+{
+    auto lock = getLock();
+    shared->tmp_path = path;
+}
+
+
+void DataBase::Context::addDatabase(const std::string& database_name, const std::shared_ptr< DataBase::IDataBase >& database)
+{
+    auto lock = getLock();
+    assertDatabaseDoesntExist(database_name);
+    shared->databases[database_name] = database;
+}
+
+void DataBase::Context::assertDatabaseDoesntExist(const std::string& database_name) const
+{
+    auto lock = getLock();
+    std::string db = resolveDatabase(database_name, current_database);
+    if (shared->databases.end() != shared->databases.find(db))
+    {
+        throw Poco::Exception("Database " + db + " already exists.", ErrorCodes::DATABASE_ALREADY_EXISTS);
+    }
+}
+
+
+//因为这是在数据库启动时完成的,所以不需要加锁
+void DataBase::Context::setApplicationType(DataBase::Context::ApplicationType type)
+{
+    shared->application_type = type;
+}
+
+
+
+//关闭context,关闭相关存储信息
 void DataBase::Context::shutdown()
 {
     shared->shutdown();
@@ -296,6 +394,43 @@ DataBase::SessionCleaner::~SessionCleaner()
     }
 }
 
+
+std::unique_ptr< DataBase::DDLGuard > DataBase::Context::getDDLGuardIfTableDoesntExist(const std::string& database, const std::string& table, const std::string& message) const
+{
+    auto lock = getLock();
+    std::map<std::string, std::shared_ptr<IDataBase>>::const_iterator it = shared->databases.find(database);
+    //如果共享上下文找到了数据表
+    if (shared->databases.end() != it && it->second->isTableExists(table))
+    {
+        return {};
+    }
+    return getDDLGuard(database, table, message);
+}
+
+std::unique_ptr< DataBase::DDLGuard > DataBase::Context::getDDLGuard(const std::string& database, const std::string& table, const std::string& message) const
+{
+    std::unique_lock<std::mutex> lock(shared->ddl_guards_mutex);
+    return std_ext::make_unique<DDLGuard>(shared->ddl_guards[database], shared->ddl_guards_mutex, std::move(lock), table, message);
+}
+
+
+
+DataBase::DDLGuard::DDLGuard(Map& map_, std::mutex& mutex_, std::unique_lock< std::mutex >&& lock, const std::string& elem, const std::string& message)
+    : map(map_), mutex(mutex_)
+{
+    bool inserted;
+    std::tie(it, inserted) = map.emplace(elem, message);
+    if (!inserted)
+    {
+        throw Poco::Exception(it->second, ErrorCodes::DDL_GUARD_IS_ACTIVE);
+    }
+}
+
+DataBase::DDLGuard::~DDLGuard()
+{
+    std::lock_guard<std::mutex> lock(mutex);
+    map.erase(it);
+}
 
 
 

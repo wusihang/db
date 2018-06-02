@@ -130,18 +130,13 @@ void DataBase::HttpHandler::trySendExceptionToClient(const std::string& s, int e
             request.stream().ignore(std::numeric_limits<std::streamsize>::max());
         }
         response.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
-        if (!response.sent())
-        {
-            ///如果未发送任何数据
-            response.send() << s << std::endl;
-        } else {
-            bool dataSent = output.out->count() != output.out->offset();
-            if(!dataSent) {
-                output.out->position() = output.out->buffer().begin();
-            }
-            output.out->next();
-            output.out->finalize();
+        bool dataSent = output.out->count() != output.out->offset();
+        if(!dataSent) {
+            output.out->position() = output.out->buffer().begin();
         }
+        IO::writeString(s,*output.out);
+        output.out->next();
+        output.out->finalize();
     } catch(...) {
         DataBase::currentExceptionLog();
     }

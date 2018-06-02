@@ -36,13 +36,14 @@ int DataBase::Server::main(const std::vector< std::string >& args)
 
     global_context = std_ext::make_unique<Context>(DataBase::Context::createGlobal());
     global_context->setGlobalContext(*global_context);
+    global_context->setApplicationType(Context::ApplicationType::SERVER);
 
     std::string path = FileUtil::getCanonicalPath(config().getString("path"));
     std::string default_database = config().getString("default_database", "default");
-
+	global_context->setCurrentDatabase(default_database);
     Poco::File(path + "data/" + default_database).createDirectories();
     Poco::File(path + "metadata/" + default_database).createDirectories();
-
+    global_context->setPath(path);
     //加大文件句柄打开数量
     {
         rlimit rlim;
@@ -68,7 +69,7 @@ int DataBase::Server::main(const std::vector< std::string >& args)
     {
         std::string tmp_path = config().getString("tmp_path", path + "tmp/");
         Poco::File(tmp_path).createDirectories();
-
+        global_context->setTemporaryPath(tmp_path);
         Poco::DirectoryIterator dir_end;
         for (Poco::DirectoryIterator it(tmp_path); it != dir_end; ++it) {
             //启动时，如果发现临时目录当中有以tmp结尾的文件，那么就删除这个文件
@@ -78,9 +79,9 @@ int DataBase::Server::main(const std::vector< std::string >& args)
             }
         }
     }
-
-    Poco::File(path + "flags/").createDirectories();
-
+    const std::string flags_path = path + "flags/";
+    Poco::File(flags_path).createDirectories();
+    global_context->setFlagsPath(flags_path);
     if (config().has("interserver_http_port")) {
         std::string this_host = config().getString("interserver_http_host", "");
         if (this_host.empty()) {
@@ -94,9 +95,9 @@ int DataBase::Server::main(const std::vector< std::string >& args)
     //退出主函数时析构，即退出时调用
     SCOPE_EXIT( {
         LOG_INFO(log, "Shutting down storages.");
-		global_context->shutdown();
+        global_context->shutdown();
         LOG_DEBUG(log, "Shutted down storages.");
-		//释放指针
+        //释放指针
         global_context.reset();
         LOG_DEBUG(log, "Destroyed global context.");
     });
@@ -225,8 +226,8 @@ int DataBase::Server::main(const std::vector< std::string >& args)
             LOG_DEBUG( log, "Closed connections." << (current_connections ? " But " + std::to_string(current_connections) + " remains." " Tip: To increase wait time add to config: <shutdown_wait_unfinished>60</shutdown_wait_unfinished>" : ""));
         });
 
-		//添加session清理线程
-		DataBase::SessionCleaner session_cleaner(*global_context);
+        //添加session清理线程
+        DataBase::SessionCleaner session_cleaner(*global_context);
         //等待外部终止应用
         waitForTerminationRequest();
     }

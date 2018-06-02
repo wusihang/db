@@ -11,7 +11,7 @@ class IAST {
 
 public:
     //子节点
-    std::vector<IAST> children;
+    std::vector<std::shared_ptr<IAST> > children;
     StringRange range;
     std::shared_ptr<std::string> query_string;
 
