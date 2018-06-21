@@ -11,6 +11,7 @@
 #include <CommonUtil/StringUtils.h>
 #include <CommonUtil/ConfigurationUtil.h>
 #include <Exception/ErrorHandler.h>
+#include <Interpreter/LoadMetadata.h>
 #include<Poco/File.h>
 #include<Poco/Timespan.h>
 #include<Poco/DirectoryIterator.h>
@@ -40,7 +41,7 @@ int DataBase::Server::main(const std::vector< std::string >& args)
 
     std::string path = FileUtil::getCanonicalPath(config().getString("path"));
     std::string default_database = config().getString("default_database", "default");
-	global_context->setCurrentDatabase(default_database);
+    global_context->setCurrentDatabase(default_database);
     Poco::File(path + "data/" + default_database).createDirectories();
     Poco::File(path + "metadata/" + default_database).createDirectories();
     global_context->setPath(path);
@@ -91,6 +92,11 @@ int DataBase::Server::main(const std::vector< std::string >& args)
                       "Configuration parameter 'interserver_http_host' doesn't exist or exists and empty. Will use '" + this_host + "' as replica host.");
         }
     }
+
+    LOG_INFO(log, "Loading metadata.");
+    /// Then, load remaining databases
+    loadMetadata(*global_context);
+    LOG_DEBUG(log, "Loaded metadata.");
 
     //退出主函数时析构，即退出时调用
     SCOPE_EXIT( {

@@ -7,7 +7,52 @@
 #include<IO/WriteBufferFromFile.h>
 #include<IO/WriteBufferHelper.h>
 #include<Poco/File.h>
+#include<Parser/ASTExpressionList.h>
+#include<Parser/ASTColumnDeclaration.h>
+#include<Storages/ColumnDefault.h>
+#include<DataTypes/DataTypeFactory.h>
+#include<DataTypes/DataTypeNumber.h>
+#include <set>
+#include <Ext/typeid_cast.h>
+
+namespace ErrorCodes {
+extern const int  INCORRECT_QUERY;
+extern const int  DUPLICATE_COLUMN;
+extern const int  EMPTY_LIST_OF_COLUMNS_PASSED;
+}
+
+
+
 namespace DataBase {
+
+using ColumnsAndDefaults = std::pair<NamesAndTypesList, ColumnDefaults>;
+static ColumnsAndDefaults parseColumns(
+    std::shared_ptr<IAST> expression_list, const Context & context) {
+    auto & column_list_ast = typeid_cast<ASTExpressionList &>(*expression_list);
+    NamesAndTypesList columns;
+    ColumnDefaults defaults;
+    std::vector<std::pair<NameAndTypePair *, ASTColumnDeclaration *> > defaulted_columns;
+    std::shared_ptr<IAST> default_expr_list = std::make_shared<ASTExpressionList>();
+    for (auto & ast : column_list_ast.children)
+    {
+        ASTColumnDeclaration & col_decl = typeid_cast<ASTColumnDeclaration &>(*ast);
+        if (col_decl.type)
+        {
+            columns.emplace_back(col_decl.name, DataTypeFactory::instance().get(col_decl.type));
+        }
+        else
+        {
+            columns.emplace_back(col_decl.name, std::make_shared<DataTypeUInt8>());
+        }
+
+        if (col_decl.default_expression)
+        {
+            defaulted_columns.emplace_back(&columns.back(), &col_decl);
+        }
+    }
+    return {columns,defaults};
+}
+
 
 IO::BlockIO InterpreterCreateQuery::execute()
 {
@@ -58,6 +103,11 @@ IO::BlockIO InterpreterCreateQuery::createTable(ASTCreateQuery& create)
     std::string database_name = create.database.empty() ? current_database : create.database;
     std::string  table_name = create.table;
     std::string data_path = path + "data/" + database_name + "/";
+
+    ColumnsInfo columns = setColumns(create);
+
+
+
     std::shared_ptr<Storage::IStorage> storage;
     //ddl语句级锁
     {
@@ -75,5 +125,40 @@ IO::BlockIO InterpreterCreateQuery::createTable(ASTCreateQuery& create)
     return {};
 }
 
+InterpreterCreateQuery::ColumnsInfo InterpreterCreateQuery::setColumns(ASTCreateQuery& create) const
+{
+    ColumnsInfo res;
+    if(create.columns) {
+        res = getColumnsInfo(create.columns,context);
+    } else {
+        throw Poco::Exception("Incorrect CREATE query: required list of column descriptions",ErrorCodes::INCORRECT_QUERY);
+    }
+    //检查列重复项
+    std::set<std::string> all_columns;
+    auto check_column_already_exists = [&all_columns](const NameAndTypePair& column_name_and_type) {
+        if (!all_columns.emplace(column_name_and_type.name).second)
+        {
+            throw Poco::Exception("Column " + column_name_and_type.name + " already exists", ErrorCodes::DUPLICATE_COLUMN);
+        }
+    };
+    for(const auto& it : *res.columns) {
+        check_column_already_exists(it);
+    }
+    return res;
+}
+
+
+InterpreterCreateQuery::ColumnsInfo InterpreterCreateQuery::getColumnsInfo(const std::shared_ptr< IAST >& columns, const Context& context)
+{
+    ColumnsInfo res;
+    auto && columns_and_defaults = parseColumns(columns, context);
+    res.columns = std::make_shared<NamesAndTypesList>(std::move(columns_and_defaults.first));
+    if (res.columns->size()  == 0)
+    {
+        throw Poco::Exception {"Cannot CREATE table without physical columns", ErrorCodes::EMPTY_LIST_OF_COLUMNS_PASSED};
+    }
+    return res;
+}
 
 }
+
