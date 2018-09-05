@@ -5,6 +5,8 @@
 #include<Poco/Exception.h>
 #include<IO/ReadBufferFromMemory.h>
 #include<IO/ReadBuffer.h>
+#include<CommonUtil/StringUtils.h>
+#include<Ext/likely.h>
 
 namespace IO {
 template <typename T, typename ReturnType = void>
@@ -84,6 +86,12 @@ readText(T & x, ReadBuffer & buf) {
     readIntText(x, buf);
 }
 
+template <typename T>
+inline typename std::enable_if<!std::is_integral<T>::value, void>::type
+readText(T & x, ReadBuffer & buf) {
+    readIntText(x, buf);
+}
+
 
 template <typename T>
 inline T parse(const char * data, size_t size)
@@ -156,6 +164,54 @@ inline char parseEscapeSequence(char c)
 }
 
 
+template <typename T, bool throw_on_error = true>
+void readIntTextUnsafe(T & x, ReadBuffer & buf)
+{
+    bool negative = false;
+    x = 0;
+
+    auto on_error = []
+    {
+        if (throw_on_error)
+		{
+			throw Poco::Exception("try read eof");
+		}
+    };
+
+    if (unlikely(buf.eof()))
+        return on_error();
+
+    if (std::is_signed<T>::value && *buf.position() == '-')
+    {
+        ++buf.position();
+        negative = true;
+        if (unlikely(buf.eof()))
+            return on_error();
+    }
+
+    if (*buf.position() == '0')                    /// There are many zeros in real datasets.
+    {
+        ++buf.position();
+        return;
+    }
+
+    while (!buf.eof())
+    {
+        if ((*buf.position() & 0xF0) == 0x30)    /// It makes sense to have this condition inside loop.
+        {
+            x *= 10;
+            x += *buf.position() & 0x0F;
+            ++buf.position();
+        }
+        else
+            break;
+    }
+
+    if (std::is_signed<T>::value && negative)
+        x = -x;
+}
+
+
 template <bool enable_sql_style_quoting, typename Vector>
 void readQuotedStringInto(Vector & s, ReadBuffer & buf);
 
@@ -174,5 +230,14 @@ void readDoubleQuotedStringInto(Vector & s, ReadBuffer & buf);
 
 // void readDoubleQuotedString(std::string & s, ReadBuffer & buf);
 void readDoubleQuotedStringWithSQLStyle(std::string & s, ReadBuffer & buf);
+
+
+inline void skipWhitespaceIfAny(ReadBuffer & buf)
+{
+    while (!buf.eof() && StringUtils::isWhitespaceASCII(*buf.position()))
+        ++buf.position();
+}
+
+void assertChar(char symbol, ReadBuffer & buf);
 
 }

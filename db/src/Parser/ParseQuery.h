@@ -3,7 +3,9 @@
 namespace DataBase {
 
 class ParseQuery: public IParserBase {
-
+private:
+	const char* end;
+	
 protected:
     const char* getName() const override{
         return "Query";
@@ -11,7 +13,7 @@ protected:
     bool parseImpl(TokenIterator& pos, std::shared_ptr< IAST >& node, Expected& expected) override;
 
 public:
-    ParseQuery() {
+    ParseQuery(const char* end_) :end(end_){
     }
 
 };

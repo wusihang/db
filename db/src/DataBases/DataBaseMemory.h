@@ -22,7 +22,9 @@ public:
     bool empty() const override;
     bool isTableExists(const std::string& table_name) const override;
     void createTable(const std::string& table_name,std::shared_ptr<Storage::IStorage>& storage,const std::shared_ptr<IAST>& query)  override;
-
+    std::shared_ptr< Storage::IStorage > tryGetTable(const std::string& name) override;
+	void shutdown() override;
+	
     ~DataBaseMemory()  {}
 };
 

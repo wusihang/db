@@ -118,7 +118,7 @@ IO::BlockIO InterpreterCreateQuery::createTable(ASTCreateQuery& create)
             throw Poco::Exception("Table " + database_name + "." + table_name + " is already exists");
         }
         std::shared_ptr< DataBase::IDataBase > database = context.getDatabase(database_name);
-        storage = StorageFactory::getStorage("MergeTree");
+        storage = StorageFactory::getStorage("MergeTree",path,table_name,database_name,context,columns.columns);
         database->createTable(table_name,storage,query_ptr);
     }
     storage->startup();

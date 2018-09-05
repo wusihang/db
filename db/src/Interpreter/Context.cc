@@ -10,10 +10,14 @@
 #include<DataBases/IDataBase.h>
 #include<CommonUtil/LoggerUtil.h>
 #include<CommonUtil/SystemUtil.h>
+#include<Storages/BackgroundProcessingPool.h>
+#include<IO/ReadBuffer.h>
+#include<Streams/FormatFactory.h>
 namespace ErrorCodes
 {
 extern const int THERE_IS_NO_SESSION;
 extern const int UNKNOWN_DATABASE;
+extern const int UNKNOWN_TABLE;
 extern const int LOGICAL_ERROR;
 extern const int SESSION_IS_LOCKED;
 extern const int DATABASE_ALREADY_EXISTS;
@@ -63,11 +67,29 @@ struct ContextShared {
     //默认应用类型
     Context::ApplicationType application_type = Context::ApplicationType::SERVER;
 
+    Storage::BackgroundProcessingPoolPtr  background_pool;
+
+    IO::FormatFactory format_factory;
+
     void shutdown() {
         if(shutdown_called) {
             return;
         }
         shutdown_called  = true;
+        std::map<std::string, std::shared_ptr<IDataBase>> current_databases;
+        {
+            Poco::ScopedLock<Poco::Mutex> lock(mutex);
+            current_databases = databases;
+        }
+
+        for (auto & database : current_databases)
+        {
+            database.second->shutdown();
+        }
+        {
+            Poco::ScopedLock<Poco::Mutex> lock(mutex);
+            databases.clear();
+        }
     }
 
     ContextShared() {
@@ -161,9 +183,26 @@ void DataBase::Context::assertDatabaseExists(const std::string& database_name, b
     //判断待设置的库名和当前库名是否同时为空,如果是,那么就抛出异常
     std::string db = resolveDatabase(database_name,current_database);
     if(db.empty()) {
-        throw Poco::Exception("database "+db+" not exist",ErrorCodes::UNKNOWN_DATABASE);
+        throw Poco::Exception("database "+db+" doesn't exist",ErrorCodes::UNKNOWN_DATABASE);
     }
 }
+
+std::shared_ptr< Storage::IStorage > DataBase::Context::getTable(const std::string& database_name, const std::string& table_name) const
+{
+    auto lock = getLock();
+    std::string db = resolveDatabase(database_name, current_database);
+    std::map<std::string, std::shared_ptr<IDataBase>>::const_iterator it = shared->databases.find(db);
+    if(shared->databases.end() == it) {
+        throw  Poco::Exception("database "+db+" doesn't exist",ErrorCodes::UNKNOWN_DATABASE);
+    }
+    auto table = it->second->tryGetTable(table_name);
+    if(!table) {
+        throw  Poco::Exception("table "+table_name+" doesn't exist",ErrorCodes::UNKNOWN_TABLE);
+    } else {
+        return table;
+    }
+}
+
 
 
 std::shared_ptr< DataBase::Context > DataBase::Context::acquireSession(const std::string& session_id, std::chrono::steady_clock::duration timeout, bool session_check) const
@@ -353,6 +392,22 @@ void DataBase::Context::setApplicationType(DataBase::Context::ApplicationType ty
 void DataBase::Context::shutdown()
 {
     shared->shutdown();
+}
+
+
+Storage::BackgroundProcessingPool& DataBase::Context::getBackgroundPool()
+{
+    auto lock = getLock();
+    if (!shared->background_pool)
+        shared->background_pool = std::make_shared<Storage::BackgroundProcessingPool>(16);
+    return *shared->background_pool;
+}
+
+
+
+IO::BlockInputStreamPtr DataBase::Context::getInputFormat(const std::string& name, IO::ReadBuffer& buf,const IO::Block & sample)
+{
+    return shared->format_factory.getInput(name,buf,sample,*this);
 }
 
 

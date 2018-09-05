@@ -6,6 +6,29 @@
 #include<Interpreter/Context.h>
 #include<Interpreter/Context.h>
 #include<string>
+#include<Streams/BlockIO.h>
+#include<Streams/CopyData.h>
+#include<Streams/InputStreamFromASTInsertQuery.h>
+
+
+static std::tuple< std::shared_ptr<DataBase::IAST>, IO::BlockIO> executeQueryImpl(const char * begin,   const char * end,   DataBase::Context & context, bool internal) {
+    DataBase::ParseQuery parser(end);
+    std::shared_ptr<DataBase::IAST> ast;
+    try {
+        //sql分析为抽象语法树
+        ast =  ParseUtil::parseQuery(parser,begin,end,"");
+        if(ast->range.first < begin || ast->range.second > end) {
+            throw Poco::Exception("Unexpected behavior: AST chars range is not inside source range");
+        }
+    } catch(...) {
+        DataBase::currentExceptionLog();
+        throw;
+    }
+    auto interpreter  = DataBase::InterpreterFactory::get(ast,context);
+    IO::BlockIO block =  interpreter -> execute();
+    return std::make_tuple(ast,block);
+}
+
 void DataBase::executeQuery(IO::ReadBuffer& ibuf, IO::WriteBuffer& wbuf,DataBase::Context& context)
 {
     const char* begin;
@@ -18,24 +41,22 @@ void DataBase::executeQuery(IO::ReadBuffer& ibuf, IO::WriteBuffer& wbuf,DataBase
     end=ibuf.buffer().end();
     ibuf.position() += (end - begin);
 
-    //暂时是: 请求参数query后的值是什么就返回什么
-    // 	wbuf.write(begin, (end - begin));
-    //...数据库处理逻辑待续...
-    DataBase::ParseQuery parser;
+
     std::shared_ptr<DataBase::IAST> ast;
-    try {
-        //sql分析为抽象语法树
-        ast =  ParseUtil::parseQuery(parser,begin,end,"");
-        if(ast->range.first < begin || ast->range.second > end) {
-            throw Poco::Exception("Unexpected behavior: AST chars range is not inside source range");
+    IO::BlockIO streams;
+    std::tie(ast, streams) = executeQueryImpl(begin, end, context, false);
+    try
+    {
+        if (streams.out)
+        {
+            //入库操作实际在此处发生
+            IO::InputStreamFromASTInsertQuery in(ast, ibuf, streams, context);
+            CopyStreamDataUtil::copyData(in, *streams.out);
         }
     } catch(...) {
         DataBase::currentExceptionLog();
         throw;
     }
-//     std::string query(begin,(ast->range.second - begin));
-    auto interpreter  = DataBase::InterpreterFactory::get(ast,context);
-    interpreter -> execute();
 }
 
 

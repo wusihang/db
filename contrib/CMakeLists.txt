@@ -1,1 +1,2 @@
 add_subdirectory(libpoco)
+add_subdirectory(libcityhash)

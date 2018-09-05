@@ -9,10 +9,21 @@
 #include<utility>
 #include<map>
 #include<Interpreter/ClientInfo.h>
+#include<Streams/IBlockInputStream.h>
 #include<Poco/Types.h>
+
+namespace IO {
+class ReadBuffer;
+}
 namespace Poco {
 class Mutex;
 }
+
+namespace Storage{
+	class BackgroundProcessingPool;
+class IStorage;
+}
+
 namespace DataBase {
 
 struct ContextShared;
@@ -81,8 +92,14 @@ public:
     //判断数据库是否存在,如果不存在,那么抛出异常
     void assertDatabaseExists(const std::string & database_name, bool check_database_acccess_rights = true) const;
 
+	  std::shared_ptr<Storage::IStorage> getTable(const std::string & database_name, const std::string & table_name) const;
+	
     //关闭Context
     void shutdown();
+	
+	Storage::BackgroundProcessingPool& getBackgroundPool(); 
+	
+	IO::BlockInputStreamPtr getInputFormat(const std::string& name,IO::ReadBuffer& buf, const IO::Block & sample);	
 
     enum ApplicationType {
         SERVER,         /// The program is run as wsdb-server daemon (default behavior)

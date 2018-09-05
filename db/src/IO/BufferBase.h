@@ -66,7 +66,6 @@ public:
     inline Position & position() {
         return pos;
     }
-    ;
 
     // 当前读写位置相对起始位置的偏移量
     inline size_t offset() const {

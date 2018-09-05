@@ -16,7 +16,8 @@ public:
     }
 
     std::shared_ptr<IColumn> createColumn() const override;
-	std::shared_ptr<IDataType> clone() const override;
+	
+    void deserializeTextQuoted(IColumn& column, IO::ReadBuffer& istr) const override;
 };
 
 template class DataTypeNumberBase<UInt8>;

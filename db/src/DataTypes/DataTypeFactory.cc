@@ -1,30 +1,101 @@
 #include<DataTypes/DataTypeFactory.h>
+#include<DataTypes/IDataType.h>
+#include<Parser/IAST.h>
+#include<Parser/ASTFunction.h>
+#include<Parser/ASTIdentifier.h>
+#include<Ext/typeid_cast.h>
+#include<Poco/String.h>
+
+namespace ErrorCodes {
+extern const int ILLEGAL_SYNTAX_FOR_DATA_TYPE;
+extern const int UNEXPECTED_AST_STRUCTURE;
+extern const int LOGICAL_ERROR;
+extern const int UNKNOWN_TYPE;
+extern const int DATA_TYPE_CANNOT_HAVE_ARGUMENTS;
+}
 
 namespace DataBase {
-	
-DataTypeFactory::DataTypeFactory()
-{
-
-}
 
 std::shared_ptr< IDataType > DataTypeFactory::get(const std::shared_ptr< IAST >& ast) const
 {
-	return nullptr;
+    if (const ASTFunction * func = typeid_cast<const ASTFunction *>(ast.get()))
+    {
+        if (func->parameters)
+            throw Poco::Exception("Data type cannot have multiple parenthesed parameters.", ErrorCodes::ILLEGAL_SYNTAX_FOR_DATA_TYPE);
+        return get(func->name, func->arguments);
+    }
+
+    if (const ASTIdentifier * ident = typeid_cast<const ASTIdentifier *>(ast.get()))
+    {
+        return get(ident->name, {});
+    }
+    throw Poco::Exception("Unexpected AST element for data type.", ErrorCodes::UNEXPECTED_AST_STRUCTURE);
 }
-std::shared_ptr< IDataType > DataTypeFactory::get(const std::string& full_name) const
-{
-	return nullptr;
-}
+
+
 std::shared_ptr< IDataType > DataTypeFactory::get(const std::string& family_name, const std::shared_ptr< IAST >& parameters) const
 {
-	return nullptr;
+    {
+        DataTypesDictionary::const_iterator it = data_types.find(family_name);
+        if (data_types.end() != it)
+            return it->second(parameters);
+    }
+
+    {
+        String family_name_lowercase = Poco::toLower(family_name);
+        DataTypesDictionary::const_iterator it = case_insensitive_data_types.find(family_name_lowercase);
+        if (case_insensitive_data_types.end() != it)
+            return it->second(parameters);
+    }
+
+    throw Poco::Exception("Unknown data type family: " + family_name, ErrorCodes::UNKNOWN_TYPE);
 }
 void DataTypeFactory::registerDataType(const std::string& family_name, Creator creator, DataTypeFactory::CaseSensitiveness case_sensitiveness)
 {
-	
+    if (creator == nullptr)
+        throw Poco::Exception("DataTypeFactory: the data type family " + family_name + " has been provided "
+                              " a null constructor", ErrorCodes::LOGICAL_ERROR);
+
+    if (!data_types.emplace(family_name, creator).second)
+    {
+        throw Poco::Exception("DataTypeFactory: the data type family name '" + family_name + "' is not unique",
+                              ErrorCodes::LOGICAL_ERROR);
+    }
+
+    String family_name_lowercase = Poco::toLower(family_name);
+
+    if (case_sensitiveness == CaseInsensitive
+            && !case_insensitive_data_types.emplace(family_name_lowercase, creator).second)
+    {
+        throw Poco::Exception("DataTypeFactory: the case insensitive data type family name '" + family_name + "' is not unique",
+                              ErrorCodes::LOGICAL_ERROR);
+    }
+
 }
 void DataTypeFactory::registerSimpleDataType(const std::string& name, SimpleCreator creator, DataTypeFactory::CaseSensitiveness case_sensitiveness)
 {
+    if (creator == nullptr)
+    {
+        throw Poco::Exception("DataTypeFactory: the data type " + name + " has been provided "
+                              " a null constructor", ErrorCodes::LOGICAL_ERROR);
+    }
 
+    registerDataType(name, [name, creator](const std::shared_ptr<IAST>  & ast){
+        if (ast)
+        {
+            throw Poco::Exception("Data type " + name + " cannot have arguments", ErrorCodes::DATA_TYPE_CANNOT_HAVE_ARGUMENTS);
+        }
+        return creator();
+    }, case_sensitiveness);
 }
+
+
+void registerDataTypeNumbers(DataTypeFactory & factory);
+
+void DataTypeFactory::registerDataTypes()
+{
+		DataTypeFactory& instance =  DataTypeFactory::instance();
+		registerDataTypeNumbers(instance);
+}
+
 }

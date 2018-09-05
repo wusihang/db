@@ -30,4 +30,6 @@ public:
     NamesAndTypesList() {}
 };
 
+using NamesAndTypesListPtr = std::shared_ptr<NamesAndTypesList>;
+
 }

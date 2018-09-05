@@ -2,6 +2,12 @@
 #include<Poco/Exception.h>
 #include<CommonUtil/FindSymbol.h>
 #include<Common/hex.h>
+#include<IO/WriteBufferFromString.h>
+#include<IO/Operators.h>
+
+namespace ErrorCodes {
+extern const int CANNOT_PARSE_INPUT_ASSERTION_FAILED;
+}
 
 template <typename Vector>
 static void parseComplexEscapeSequence(Vector & s, IO::ReadBuffer & buf)
@@ -66,6 +72,19 @@ static void readAnyQuotedStringInto(Vector & s, IO::ReadBuffer & buf)
 }
 
 
+static void __attribute__((__noinline__)) throwAtAssertionFailed(const char * s, IO::ReadBuffer & buf)
+{
+    IO::WriteBufferFromOwnString out;
+    out <<  "Cannot parse input: expected " << s;
+
+    if (buf.eof())
+        out << " at end of stream.";
+    else
+        out << " before: "  << std::string(buf.position(), std::min(160, static_cast<int>(buf.buffer().end() - buf.position())));
+
+    throw Poco::Exception(out.str(), ErrorCodes::CANNOT_PARSE_INPUT_ASSERTION_FAILED);
+}
+
 
 
 void IO::readBackQuotedStringWithSQLStyle(std::string& s, IO::ReadBuffer& buf)
@@ -104,4 +123,15 @@ template <bool enable_sql_style_quoting, typename Vector>
 void IO::readDoubleQuotedStringInto(Vector & s, IO::ReadBuffer & buf)
 {
     readAnyQuotedStringInto<'"', enable_sql_style_quoting>(s, buf);
+}
+
+
+void IO::assertChar(char symbol, IO::ReadBuffer& buf)
+{
+    if (buf.eof() || *buf.position() != symbol)
+    {
+        char err[2] = {symbol, '\0'};
+        throwAtAssertionFailed(err, buf);
+    }
+    ++buf.position();
 }

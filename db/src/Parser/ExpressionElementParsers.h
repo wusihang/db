@@ -2,7 +2,7 @@
 #include<Parser/IParserBase.h>
 #include<Parser/IdentifierParser.h>
 namespace DataBase {
-
+	
 class UnsignedIntegerParser : public IParserBase
 {
 protected:
