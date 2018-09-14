@@ -9,9 +9,14 @@ namespace Poco {
 class Logger;
 }
 
+namespace IO{
+	class MergeTreeBlockOutputStream;
+}
+
 namespace Storage {
 
 class MergeTreeStorage: public IStorage {
+    friend class IO::MergeTreeBlockOutputStream;
 public:
     std::string getName() const override {
         return "MergeTree";
@@ -25,12 +30,14 @@ public:
     MergeTreeStorage(DataBase::Context& _context,const std::string & path_,
                      const std::string & database_name_,
                      const std::string & table_name_,DataBase::NamesAndTypesListPtr columns_);
-	
-	 const DataBase::NamesAndTypesList & getColumnsListImpl() const override { return data.getColumnsListNonMaterialized(); }
+
+    const DataBase::NamesAndTypesList & getColumnsListImpl() const override {
+        return data.getColumnsListNonMaterialized();
+    }
 
 private:
-	friend struct CurrentlyMergingPartsTagger;
-	
+    friend struct CurrentlyMergingPartsTagger;
+
     BackgroundProcessingPool& pool;
     DataBase::Context& context;
     BackgroundProcessingPool::TaskHandle merge_task_handle;
@@ -42,10 +49,10 @@ private:
     MergeTreeData data;
     std::mutex currently_merging_mutex;
     MergeTreeData::DataParts currently_merging;
-	
-	MergeTreeDataMerger merger;
-	
-	MergeTreeDataWriter writer;
+
+    MergeTreeDataMerger merger;
+
+    MergeTreeDataWriter writer;
 
 
     bool mergeTask();

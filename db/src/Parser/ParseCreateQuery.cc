@@ -6,6 +6,8 @@
 #include<Parser/ASTIdentifier.h>
 #include<Parser/ColumnParser.h>
 #include<Ext/typeid_cast.h>
+#include<Parser/ASTFunction.h>
+#include<Parser/ExpressionElementParsers.h>
 
 namespace DataBase {
 bool ParserCreateQuery::parseImpl(TokenIterator& pos, std::shared_ptr< IAST >& node, Expected& expected)
@@ -25,10 +27,13 @@ bool ParserCreateQuery::parseImpl(TokenIterator& pos, std::shared_ptr< IAST >& n
     //字段列表声明
     ColumnDeclarationListParser column_list_parser;
 
+    ParserEngine engine_parser;
+
     //以下是创建语句必要的语法结构
     std::shared_ptr<IAST> database;
     std::shared_ptr<IAST> table;
     std::shared_ptr<IAST> columns;
+    std::shared_ptr<IAST> storage;
     if(!key_create.ignore(pos,expected))
     {
         return false;
@@ -60,6 +65,7 @@ bool ParserCreateQuery::parseImpl(TokenIterator& pos, std::shared_ptr< IAST >& n
                 return false;
             }
         }
+        engine_parser.parse(pos,storage,expected);
     }
 
     auto query = std::make_shared<ASTCreateQuery>(StringRange(begin, pos));
@@ -74,7 +80,56 @@ bool ParserCreateQuery::parseImpl(TokenIterator& pos, std::shared_ptr< IAST >& n
         query->columns = columns;
         query->children.push_back(columns);
     }
+    query->storage = storage;
+    if(storage) {
+        query->children.push_back(storage);
+    }
     return true;
 }
+
+bool ParserEngine::parseImpl(TokenIterator& pos, std::shared_ptr< IAST >& node, Expected& expected)
+{
+    KeywordParser s_engine("ENGINE");
+    TokenParser s_eq(TokenType::Equals);
+    ParserIdentifierWithOptionalParameters storage_p;
+
+    if (s_engine.ignore(pos, expected))
+    {
+        if (!s_eq.ignore(pos, expected))
+            return false;
+
+        if (!storage_p.parse(pos, node, expected))
+            return false;
+    }
+    return true;
+}
+
+bool ParserIdentifierWithOptionalParameters::parseImpl(TokenIterator& pos, std::shared_ptr< IAST >& node, Expected& expected)
+{
+    IdentifierParser non_parametric;
+    ParserIdentifierWithParameters parametric;
+    TokenIterator begin = pos;
+    if (parametric.parse(pos, node, expected))
+        return true;
+
+    std::shared_ptr< IAST > ident;
+    if (non_parametric.parse(pos, ident, expected))
+    {
+        auto func = std::make_shared<ASTFunction>(StringRange(begin));
+        func->name = typeid_cast<ASTIdentifier &>(*ident).name;
+        node = func;
+        return true;
+    }
+
+    return false;
+}
+
+bool ParserIdentifierWithParameters::parseImpl(TokenIterator& pos, std::shared_ptr< IAST >& node, Expected& expected)
+{
+    FunctionParser function_or_array;
+    return function_or_array.parse(pos, node, expected);
+}
+
+
 }
 

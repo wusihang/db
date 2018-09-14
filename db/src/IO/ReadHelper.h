@@ -232,6 +232,9 @@ void readDoubleQuotedStringInto(Vector & s, ReadBuffer & buf);
 void readDoubleQuotedStringWithSQLStyle(std::string & s, ReadBuffer & buf);
 
 
+void readQuotedStringWithSQLStyle(std::string & s, ReadBuffer & buf);
+
+
 inline void skipWhitespaceIfAny(ReadBuffer & buf)
 {
     while (!buf.eof() && StringUtils::isWhitespaceASCII(*buf.position()))

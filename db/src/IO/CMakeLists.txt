@@ -2,4 +2,4 @@
  
  add_library(IOLib STATIC ${IO_LIB_DIR})
  
- target_link_libraries(IOLib ${Poco_Foundation_LIBRARY} CommonLib)
+ target_link_libraries(IOLib ${Poco_Foundation_LIBRARY} CommonLib double-conversion)

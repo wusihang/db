@@ -5,6 +5,7 @@
 #include<Parser/ASTFunction.h>
 #include<Parser/TokenParser.h>
 #include<Parser/ExpressionElementParsers.h>
+#include<Ext/std_ext.h>
 
 namespace DataBase {
 
@@ -102,7 +103,7 @@ bool ListParser::parseImpl(TokenIterator& pos, std::shared_ptr< IAST >& node, Ex
         }
         else
         {
-            auto prev_pos = pos;
+            TokenIterator prev_pos = pos;
             if (!separator_parser->ignore(pos, expected))
                 break;
             std::shared_ptr< IAST > elem;
@@ -117,6 +118,15 @@ bool ListParser::parseImpl(TokenIterator& pos, std::shared_ptr< IAST >& node, Ex
     return (allow_empty || !first);
 }
 
+bool ExpressionListParser::parseImpl(TokenIterator& pos, std::shared_ptr< IAST >& node, Expected& expected)
+{
+    return ListParser(
+               std_ext::make_unique<ExpressionWithOptionalAliasParser>(allow_alias_without_as_keyword, prefer_alias_to_column_name),
+               std_ext::make_unique<TokenParser>(TokenType::Comma))
+           .parse(pos, node, expected);
+}
+
+
 //三元表达式  (condtion) ? result1 : result2s
 bool TernaryOperatorExpressionParser::parseImpl(TokenIterator& pos, std::shared_ptr< IAST >& node, Expected& expected)
 {
@@ -125,7 +135,7 @@ bool TernaryOperatorExpressionParser::parseImpl(TokenIterator& pos, std::shared_
     std::shared_ptr< IAST > elem_cond;
     std::shared_ptr< IAST > elem_then;
     std::shared_ptr< IAST > elem_else;
-    auto begin = pos;
+    DataBase::TokenIterator begin = pos;
     //逻辑判断部分解析
     if (!elem_parser.parse(pos, elem_cond, expected))
         return false;
@@ -171,7 +181,7 @@ bool TernaryOperatorExpressionParser::parseImpl(TokenIterator& pos, std::shared_
 //内容注释以 or为例
 bool VariableArityOperatorListParser::parseImpl(TokenIterator& pos, std::shared_ptr< IAST >& node, Expected& expected)
 {
-    auto begin = pos;
+    DataBase::TokenIterator begin = pos;
     std::shared_ptr<IAST> arguments;
     //or表达式传入的内容为and表达式解析,先解析and部分
     if(!elem_parser->parse(pos,node,expected)) {
@@ -180,7 +190,7 @@ bool VariableArityOperatorListParser::parseImpl(TokenIterator& pos, std::shared_
     while(1) {
         //当表达式为or时, 插入词 infix = or   , 也就是解析or关键字
         if(!parseOperator(pos,infix,expected)) {
-            return false;
+            break;
         }
         //第一次循环时, 用传入的函数名构建ASTFunction语法树
         if(!arguments) {
@@ -205,7 +215,7 @@ bool VariableArityOperatorListParser::parseImpl(TokenIterator& pos, std::shared_
 //前缀表达式
 bool PrefixUnaryOperatorExpressionParser::parseImpl(TokenIterator& pos, std::shared_ptr< IAST >& node, Expected& expected)
 {
-    auto begin = pos;
+    DataBase::TokenIterator begin = pos;
     const char ** it;
     for (it = operators; *it; it += 2)
     {
@@ -273,7 +283,7 @@ bool PrefixUnaryOperatorExpressionParser::parseImpl(TokenIterator& pos, std::sha
 bool LeftAssociativeBinaryOperatorListParser::parseImpl(TokenIterator& pos, std::shared_ptr< IAST >& node, Expected& expected)
 {
     bool first = true;
-    auto begin = pos;
+    DataBase::TokenIterator begin = pos;
     while (1)
     {
         //首次解左侧表达式
@@ -340,7 +350,7 @@ bool ParserNullityChecking::parseImpl(TokenIterator& pos, std::shared_ptr< IAST 
     {
         return false;
     }
-    auto begin = pos;
+    DataBase::TokenIterator begin = pos;
     KeywordParser s_is("IS");
     KeywordParser s_not("NOT");
     KeywordParser s_null("NULL");
@@ -379,7 +389,7 @@ bool BetweenExpressionParser::parseImpl(TokenIterator& pos, std::shared_ptr< IAS
     std::shared_ptr< IAST > subject;
     std::shared_ptr< IAST > left;
     std::shared_ptr< IAST > right;
-    auto begin = pos;
+    DataBase::TokenIterator begin = pos;
     if (!elem_parser.parse(pos, subject, expected))
         return false;
     if (!s_between.ignore(pos, expected))
@@ -443,7 +453,7 @@ bool UnaryMinusExpressionParser::parseImpl(TokenIterator& pos, std::shared_ptr< 
     if (pos->type == TokenType::Minus)
     {
         LiteralParser lit_p;
-        auto begin = pos;
+        DataBase::TokenIterator begin = pos;
 
         if (lit_p.parse(pos, node, expected))
             return true;
@@ -484,7 +494,7 @@ bool LambdaExpressionParser::parseImpl(TokenIterator& pos, std::shared_ptr< IAST
     TokenParser arrow(TokenType::Arrow);
     TokenParser open(TokenType::OpeningRoundBracket);
     TokenParser close(TokenType::ClosingRoundBracket);
-    auto begin = pos;
+    DataBase::TokenIterator begin = pos;
     do
     {
         std::shared_ptr<IAST> inner_arguments;

@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <Poco/Types.h>
+#include <Core/StrongTypeDef.h>
 
 
 namespace DataBase
@@ -24,6 +25,8 @@ using Float64 = double;
 
 using String = std::string;
 using Strings = std::vector<String>;
+
+STRONG_TYPEDEF(char,Null)
 
 /// Ordinary types with nullability.
 template <typename T> struct Nullable {
@@ -145,6 +148,12 @@ template <> struct TypeName<Float64> {
 template <> struct TypeName<String>  {
     static const char * get() {
         return "String";
+    }
+};
+
+template <> struct TypeName<Null>  {
+    static const char * get() {
+        return "Nul";
     }
 };
 

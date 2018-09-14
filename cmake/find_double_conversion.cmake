@@ -1,0 +1,1 @@
+include_directories(BEFORE ${PROJECT_ROOT_PATH}/contrib/libdouble-conversion)

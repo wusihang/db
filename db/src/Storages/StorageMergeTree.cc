@@ -4,7 +4,7 @@
 #include<Poco/Exception.h>
 #include<Poco/Logger.h>
 #include<Storages/DiskSpaceMonitor.h>
-#include<Streams/MergeTreeBlockOutputStream.h>
+#include<Storages/MergeTree//MergeTreeBlockOutputStream.h>
 #include <experimental/optional>
 namespace ErrorCodes
 {

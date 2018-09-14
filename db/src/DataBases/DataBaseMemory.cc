@@ -1,5 +1,7 @@
 #include<DataBases/DataBaseMemory.h>
 #include<Poco/Exception.h>
+#include<Interpreter/Context.h>
+#include<Poco/Logger.h>
 
 namespace ErrorCodes {
 extern const int TABLE_ALREADY_EXISTS;
@@ -26,6 +28,20 @@ void DataBaseMemory::createTable(const std::string& table_name,std::shared_ptr<S
         throw Poco::Exception("Table " + name + "." + table_name + " already exists.", ErrorCodes::TABLE_ALREADY_EXISTS);
     }
 }
+
+void DataBaseMemory::loadTables(Context& context)
+{
+    log = &Poco::Logger::get("DatabaseMemory(" + name + ")");
+    //do nothing
+}
+
+void DataBaseMemory::attachTable(const String& table_name, const std::shared_ptr< Storage::IStorage >& table)
+{
+    std::lock_guard<std::mutex> lock(mutex);
+    if (!tables.emplace(table_name, table).second)
+        throw Poco::Exception("Table " + name + "." + table_name + " already exists.", ErrorCodes::TABLE_ALREADY_EXISTS);
+}
+
 
 std::shared_ptr< Storage::IStorage > DataBaseMemory::tryGetTable(const std::string& name)
 {

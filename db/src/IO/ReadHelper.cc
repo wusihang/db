@@ -125,6 +125,12 @@ void IO::readDoubleQuotedStringInto(Vector & s, IO::ReadBuffer & buf)
     readAnyQuotedStringInto<'"', enable_sql_style_quoting>(s, buf);
 }
 
+void IO::readQuotedStringWithSQLStyle(std::string& s, IO::ReadBuffer& buf)
+{
+    s.clear();
+    readQuotedStringInto<true>(s, buf);
+}
+
 
 void IO::assertChar(char symbol, IO::ReadBuffer& buf)
 {

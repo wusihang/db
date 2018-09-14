@@ -3,6 +3,13 @@
 #include<Parser/IdentifierParser.h>
 namespace DataBase {
 	
+class FunctionParser : public IParserBase
+{
+protected:
+    const char * getName() const { return "function"; }
+    bool parseImpl(TokenIterator & pos, std::shared_ptr<IAST>& node, Expected & expected) override;
+};
+	
 class UnsignedIntegerParser : public IParserBase
 {
 protected:
@@ -38,6 +45,14 @@ protected:
     bool parseImpl(TokenIterator & pos, std::shared_ptr<IAST> & node, Expected & expected) override;
 };
 
+class AsteriskParser : public IParserBase
+{
+protected:
+    const char * getName() const { return "asterisk"; }
+    bool parseImpl(TokenIterator & pos, std::shared_ptr<IAST> & node, Expected & expected);
+};
+
+
 /** The literal is one of: NULL, UInt64, Int64, Float64, String.
 */
 class LiteralParser : public IParserBase
@@ -45,6 +60,14 @@ class LiteralParser : public IParserBase
 protected:
     const char * getName() const {
         return "literal";
+    }
+    bool parseImpl(TokenIterator & pos, std::shared_ptr<IAST> & node, Expected & expected) override;
+};
+
+class CompoundIdentifierParser:public IParserBase{
+	protected:
+    const char * getName() const {
+        return "compound identifier";
     }
     bool parseImpl(TokenIterator & pos, std::shared_ptr<IAST> & node, Expected & expected) override;
 };

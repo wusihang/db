@@ -5,6 +5,8 @@
 #include<Storages/ITableDeclaration.h>
 #include<Storages/MergeTree/MergeTreeDataPart.h>
 #include<Core/NamesAndTypes.h>
+#include<Poco/Event.h>
+
 namespace Storage {
 
 class MergeTreeData:public ITableDeclaration {
@@ -53,6 +55,8 @@ public:
     const DataBase::NamesAndTypesList& getColumnsListImpl() const override {
 		return *columns;
     }
+    
+    void delayInsertIfNeeded(Poco::Event * until = nullptr);
 
 private:
     std::string database_name;
