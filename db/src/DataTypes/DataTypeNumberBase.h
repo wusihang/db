@@ -16,7 +16,14 @@ public:
     }
 
     std::shared_ptr<IColumn> createColumn() const override;
-	std::shared_ptr<IDataType> clone() const override;
+	
+    void deserializeTextQuoted(IColumn& column, IO::ReadBuffer& istr) const override;
+	
+	void serializeBinary(const Field & field, IO::WriteBuffer & ostr) const override;
+	
+	void serializeBinary(const IColumn & column, size_t row_num, IO::WriteBuffer & ostr) const override;
+	
+	void serializeBinaryBulk(const IColumn & column, IO::WriteBuffer & ostr, size_t offset, size_t limit) const override;
 };
 
 template class DataTypeNumberBase<UInt8>;

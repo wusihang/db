@@ -1,1 +1,4 @@
 add_subdirectory(libpoco)
+add_subdirectory(libcityhash)
+add_subdirectory(libdouble-conversion)
+add_subdirectory(libcctz)

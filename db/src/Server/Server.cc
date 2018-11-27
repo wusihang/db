@@ -21,6 +21,8 @@
 #include<Poco/Exception.h>
 #include<Poco/Net/DNS.h>
 #include <Poco/Net/NetException.h>
+#include<DataTypes/DataTypeFactory.h>
+#include<Core/DateLUT.h>
 #include<memory>
 #include<chrono>
 #include<string>
@@ -34,6 +36,7 @@ int DataBase::Server::main(const std::vector< std::string >& args)
     Poco::ErrorHandler::set(&error_handler);
     DataBase::registerFunctions();
     DataBase::registerAggregationFunctions();
+	DataTypeFactory::registerDataTypes();
 
     global_context = std_ext::make_unique<Context>(DataBase::Context::createGlobal());
     global_context->setGlobalContext(*global_context);
@@ -66,6 +69,11 @@ int DataBase::Server::main(const std::vector< std::string >& args)
         }
     }
 
+    /// Initialize DateLUT early, to not interfere with running time of first query.
+    LOG_DEBUG(log, "Initializing DateLUT.");
+    DataBase::DateLUT::instance();
+    LOG_TRACE(log, "Initialized DateLUT with time zone `" << DateLUT::instance().getTimeZone() << "'.");
+    
     //创建临时文件目录
     {
         std::string tmp_path = config().getString("tmp_path", path + "tmp/");
@@ -217,7 +225,7 @@ int DataBase::Server::main(const std::vector< std::string >& args)
             LOG_DEBUG(log, "Closed all listening sockets." << (current_connections ? " Waiting for " + std::to_string(current_connections) + " outstanding connections." : ""));
             if (current_connections)
             {
-                const int sleep_max_ms = 1000 * config().getInt("shutdown_wait_unfinished", 5);
+                const int sleep_max_ms = 1000 * config().getInt("shutdown_wait_unfinished", 60);
                 const int sleep_one_ms = 100;
                 int sleep_current_ms = 0;
                 while (sleep_current_ms < sleep_max_ms) {

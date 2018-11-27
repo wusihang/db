@@ -18,6 +18,7 @@
 #include<IO/ReadBufferFromString.h>
 #include<IO/WriteBufferHelper.h>
 #include<IO/ReadHelper.h>
+#include<Exception/ExceptionHelper.h>
 
 namespace ErrorCodes
 {
@@ -64,8 +65,7 @@ void DataBase::HttpHandler::handleRequest(Poco::Net::HTTPServerRequest & request
         processQuery(request,params,response,output);
         LOG_INFO(log, "Done processing query");
     } catch (...) {
-        DataBase::currentExceptionLog();
-        trySendExceptionToClient("cannot executeQuery",500,request,response,output);
+        trySendExceptionToClient(DataBase::currentExceptionLog(),500,request,response,output);
     }
 }
 

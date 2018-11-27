@@ -20,5 +20,9 @@ public:
 
     void createTable(const std::string& table_name, std::shared_ptr< Storage::IStorage >& storage,const std::shared_ptr<IAST>& query) override;
 
+    void loadTables(Context& context) override;
+
+private:
+    void startupTables();
 };
 }

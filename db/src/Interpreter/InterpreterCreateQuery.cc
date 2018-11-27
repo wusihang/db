@@ -9,6 +9,7 @@
 #include<Poco/File.h>
 #include<Parser/ASTExpressionList.h>
 #include<Parser/ASTColumnDeclaration.h>
+#include <Parser/ASTFunction.h>
 #include<Storages/ColumnDefault.h>
 #include<DataTypes/DataTypeFactory.h>
 #include<DataTypes/DataTypeNumber.h>
@@ -19,6 +20,7 @@ namespace ErrorCodes {
 extern const int  INCORRECT_QUERY;
 extern const int  DUPLICATE_COLUMN;
 extern const int  EMPTY_LIST_OF_COLUMNS_PASSED;
+extern const int ENGINE_REQUIRED;
 }
 
 
@@ -79,17 +81,27 @@ IO::BlockIO InterpreterCreateQuery::createDatabase(ASTCreateQuery& create)
     std::shared_ptr<IDataBase>  database = DatabaseFactory::get(engine_name,database_name,metadata_path,context);
     std::string metadata_file_tmp_path = path + "metadata/" + database_name + ".sql.tmp";
     std::string metadata_file_path = path + "metadata/" + database_name + ".sql";
+    bool need_write_metadata = !create.attach;
+    if(need_write_metadata) {
+        create.attach = true;
+        std::string statement = "create database " + database_name;
+        IO::WriteBufferFromFile write_buf(metadata_file_tmp_path,statement.size(),O_WRONLY | O_CREAT | O_EXCL);
+        IO::writeString(statement,write_buf);
+        write_buf.next();
+        write_buf.sync();
+        write_buf.close();
+    }
 
-    std::string statement = "create database " + database_name;
-    IO::WriteBufferFromFile write_buf(metadata_file_tmp_path,statement.size(),O_WRONLY | O_CREAT | O_EXCL);
-    IO::writeString(statement,write_buf);
-    write_buf.sync();
-    write_buf.next();
     try {
         context.addDatabase(database_name,database);
-        Poco::File(metadata_file_tmp_path).renameTo(metadata_file_path);
+        if(need_write_metadata) {
+            Poco::File(metadata_file_tmp_path).renameTo(metadata_file_path);
+        }
+        database->loadTables(context);
     } catch(...) {
-        Poco::File(metadata_file_tmp_path).remove();
+        if(need_write_metadata) {
+            Poco::File(metadata_file_tmp_path).remove();
+        }
         throw;
     }
     return {};
@@ -97,6 +109,9 @@ IO::BlockIO InterpreterCreateQuery::createDatabase(ASTCreateQuery& create)
 
 IO::BlockIO InterpreterCreateQuery::createTable(ASTCreateQuery& create)
 {
+    if(!create.storage) {
+        throw Poco::Exception("engine required",ErrorCodes::ENGINE_REQUIRED);
+    }
     std::string path = context.getPath();
     std::string current_database = context.getCurrentDatabase();
     //如果未指定库名,那么就使用当前上下文的库
@@ -105,8 +120,6 @@ IO::BlockIO InterpreterCreateQuery::createTable(ASTCreateQuery& create)
     std::string data_path = path + "data/" + database_name + "/";
 
     ColumnsInfo columns = setColumns(create);
-
-
 
     std::shared_ptr<Storage::IStorage> storage;
     //ddl语句级锁
@@ -118,7 +131,8 @@ IO::BlockIO InterpreterCreateQuery::createTable(ASTCreateQuery& create)
             throw Poco::Exception("Table " + database_name + "." + table_name + " is already exists");
         }
         std::shared_ptr< DataBase::IDataBase > database = context.getDatabase(database_name);
-        storage = StorageFactory::getStorage("MergeTree");
+        ASTFunction& engine = typeid_cast<ASTFunction&>( *create.storage);
+        storage = StorageFactory::getStorage(engine.name,path,table_name,database_name,context,columns.columns,query_ptr);
         database->createTable(table_name,storage,query_ptr);
     }
     storage->startup();
@@ -161,4 +175,9 @@ InterpreterCreateQuery::ColumnsInfo InterpreterCreateQuery::getColumnsInfo(const
 }
 
 }
+
+
+
+
+
 

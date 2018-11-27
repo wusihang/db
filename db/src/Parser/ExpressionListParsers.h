@@ -23,6 +23,21 @@ private:
     bool allow_empty;
 };
 
+class ExpressionListParser : public IParserBase
+{
+public:
+    ExpressionListParser(bool allow_alias_without_as_keyword_, bool prefer_alias_to_column_name_ = false)
+    : allow_alias_without_as_keyword(allow_alias_without_as_keyword_), prefer_alias_to_column_name(prefer_alias_to_column_name_) {}
+
+protected:
+    bool allow_alias_without_as_keyword;
+    bool prefer_alias_to_column_name;
+
+    const char * getName() const { return "list of expressions"; }
+   bool parseImpl(TokenIterator & pos, std::shared_ptr<IAST> & node, Expected & expected) override;
+};
+
+
 
 class ExpressionWithOptionalAliasParser : public IParserBase
 {

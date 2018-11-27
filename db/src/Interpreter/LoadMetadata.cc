@@ -5,10 +5,10 @@
 #include <Parser/ParseUtil.h>
 #include<Ext/typeid_cast.h>
 #include<Parser/ASTCreateQuery.h>
-#include<Parser/ParseQuery.h>
 #include<Interpreter/InterpreterCreateQuery.h>
 #include<IO/ReadHelper.h>
 #include<IO/ReadBufferFromFile.h>
+#include<Parser/ParseCreateQuery.h>
 
 namespace DataBase {
 static void executeCreateQuery(
@@ -19,7 +19,7 @@ static void executeCreateQuery(
     ThreadPool * pool,
     bool has_force_restore_data_flag)
 {
-    DataBase::ParseQuery parser;
+    DataBase::ParserCreateQuery parser;
     std::shared_ptr<IAST> ast = ParseUtil::parseQuery(parser, query.data(), query.data() + query.size(), "in file " + file_name);
     DataBase::ASTCreateQuery & ast_create_query = typeid_cast< DataBase::ASTCreateQuery &>(*ast);
     ast_create_query.database = database;

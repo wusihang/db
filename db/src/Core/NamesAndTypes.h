@@ -3,8 +3,16 @@
 #include<memory>
 #include <list>
 #include<DataTypes/IDataType.h>
-namespace DataBase {
+#include<unordered_set>
+namespace IO{
+	class WriteBuffer;
+}
 
+namespace DataBase {
+using Names = std::vector<std::string>;
+using NameSet = std::unordered_set<std::string>;
+	
+	
 struct NameAndTypePair
 {
     std::string name;
@@ -28,6 +36,18 @@ struct NameAndTypePair
 class NamesAndTypesList: public std::list<NameAndTypePair> {
 public:
     NamesAndTypesList() {}
+    NamesAndTypesList(std::initializer_list<NameAndTypePair> init) : std::list<NameAndTypePair>(init) {}
+    template <typename Iterator>
+    NamesAndTypesList(Iterator begin, Iterator end) : std::list<NameAndTypePair>(begin, end) {}
+
+    Names getNames() const;
+
+    NamesAndTypesList filter(const Names& names) const;
+    NamesAndTypesList filter(const NameSet& names) const;
+	
+	 void writeText(IO::WriteBuffer & buf) const;
 };
+
+using NamesAndTypesListPtr = std::shared_ptr<NamesAndTypesList>;
 
 }

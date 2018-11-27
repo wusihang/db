@@ -9,19 +9,19 @@
 class ServerErrorHandler:public Poco::ErrorHandler {
 public:
     void exception(const Poco::Exception & e)     {
-        logException("errorCode:" + IO::toString<int>(e.code()) + ", errorMsg: " + e.displayText());
+        logException("errorCode:" + IO::toString<int>(e.code()) + ",  " + e.displayText());
     }
     void exception(const std::exception & e)    {
-        logException("errorMsg: " + std::string(e.what()));
+        logException(std::string(e.what()));
     }
     void exception() {
-        logException("errorMsg: unknow error");
+        logException("unknow exception");
     }
 
 private:
     Poco::Logger * log = &Poco::Logger::get("ServerErrorHandler");
-    void logException(std::string msg)
+    void logException(std::string&& msg)
     {
-        LOG_ERROR(log, "exception ocrured !   " + msg);
+        LOG_ERROR(log, "some exception ocrured !   " + msg);
     }
 };
