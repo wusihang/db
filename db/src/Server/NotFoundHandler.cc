@@ -1,7 +1,7 @@
 #include<Server/NotFoundHandler.h>
 #include<Poco/Net/HTTPServerRequest.h>
 #include<Poco/Net/HTTPServerResponse.h>
-#include<CommonUtil/LoggerUtil.h>
+#include<Exception/ExceptionHelper.h>
 
 void DataBase::NotFoundHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 {

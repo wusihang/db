@@ -133,7 +133,7 @@ void DataBase::DataBaseOrdinary::loadTables(DataBase::Context& context)
     size_t total_tables = file_names.size();
     LOG_INFO(log, "Total " << total_tables << " tables.");
 
-    String data_path = context.getPath() + "/data/" + name + "/";
+    String data_path = context.getPath() + "data/" + name + "/";
 
     std::atomic<size_t> tables_processed {0};
 

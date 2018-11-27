@@ -11,6 +11,7 @@
 #include<Interpreter/ClientInfo.h>
 #include<Streams/IBlockInputStream.h>
 #include<Poco/Types.h>
+#include<Interpreter/Settings.h>
 
 namespace IO {
 class ReadBuffer;
@@ -68,6 +69,9 @@ public:
     const ClientInfo& getClientInfo() const {
         return client_info;
     }
+    
+    Settings getSettings() const;
+    void setSettings(const Settings & settings_);
 
     //存储路径相关
     std::string getPath() const;
@@ -130,6 +134,8 @@ private:
     bool session_is_used = false;
     //session关闭周期
     Poco::UInt64 session_close_cycle = 0;
+	
+	 Settings settings;
 };
 
 

@@ -5,10 +5,13 @@
 #include<IO/WriteBuffer.h>
 #include<map>
 #include<Storages/MergeTree/MergeTreePartInfo.h>
-class SipHash;
+#include<Columns/IColumn.h>
+#include<Core/NamesAndTypes.h>
+#include<atomic>
+// class SipHash;
 
 namespace Storage {
-
+class MergeTreeData;
 struct MergeTreeDataPartChecksum {
     using uint128 = CityHash_v1_0_2::uint128;
     size_t file_size {};
@@ -28,8 +31,8 @@ struct MergeTreeDataPartChecksum {
     void checkSize(const std::string & path) const;
 };
 
-struct MergeTreeDataPartChecksums{
-	using Checksum = MergeTreeDataPartChecksum;
+struct MergeTreeDataPartChecksums {
+    using Checksum = MergeTreeDataPartChecksum;
 
     /// The order is important.
     using FileChecksums = std::map<std::string, Checksum>;
@@ -59,7 +62,7 @@ struct MergeTreeDataPartChecksums{
     }
 
     /// Checksum from the set of checksums of .bin files.
-    void summaryDataChecksum(SipHash & hash) const;
+//     void summaryDataChecksum(SipHash & hash) const;
 
     std::string toString() const;
     static MergeTreeDataPartChecksums parse(const std::string & s);
@@ -67,8 +70,46 @@ struct MergeTreeDataPartChecksums{
 
 struct MergeTreeDataPart
 {
-	 MergeTreePartInfo info;
-	 std::string name;
+    using Checksums = MergeTreeDataPartChecksums;
+    using Checksum = MergeTreeDataPartChecksums::Checksum;
+
+    MergeTreeDataPart(MergeTreeData & storage_) : storage(storage_) {}
+    MergeTreePartInfo info;
+    std::string name;
+    mutable std::string relative_path;
+    bool is_temp = false;
+    MergeTreeData& storage;
+
+    using Index = DataBase::Columns;
+    Index index;
+	
+	DataBase::DayNum_t min_date;
+    DataBase::DayNum_t max_date;
+	
+	size_t size = 0;            
+	
+	DataBase::NamesAndTypesList columns;
+	
+	time_t modification_time = 0;
+
+	using ColumnToSize = std::map<std::string, size_t>;
+	
+	Checksums checksums;
+	
+	 std::atomic<size_t> size_in_bytes {0};  /// size in bytes, 0 - if not counted;
+                                            ///  is used from several threads without locks (it is changed with ALTER).
+	 
+	 mutable time_t remove_time = std::numeric_limits<time_t>::max(); /// When the part is removed from the working set.
+	
+    std::string getFullPath() const;
+	
+	/// Makes checks and move part to new directory
+    /// Changes only relative_dir_name, you need to update other metadata (name, is_temp) explicitly
+    void renameTo(const std::string & new_relative_path, bool remove_new_dir_if_exists = true) const;
+	
+	bool contains(const MergeTreeDataPart & other) const { return info.contains(other.info); }
+	
+	static size_t calcTotalSize(const std::string & from);
 };
 
 }

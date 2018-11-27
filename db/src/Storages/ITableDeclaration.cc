@@ -1,5 +1,5 @@
 #include<Storages/ITableDeclaration.h>
-
+#include<Ext/collection_cast.h>
 IO::Block Storage::ITableDeclaration::getSampleBlock() const
 {
     IO::Block res;
@@ -15,3 +15,10 @@ const DataBase::NamesAndTypesList Storage::ITableDeclaration::getColumnsListRang
 {
     return getColumnsListImpl();
 }
+
+DataBase::NamesAndTypesList Storage::ITableDeclaration::getColumnsList() const
+{
+    return ext::collection_cast<DataBase::NamesAndTypesList>(getColumnsListRange());
+}
+
+

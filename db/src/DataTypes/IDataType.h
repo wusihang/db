@@ -6,6 +6,7 @@
 #include<Columns/IColumn.h>
 namespace IO {
 class ReadBuffer;
+class WriteBuffer;
 }
 
 namespace DataBase {
@@ -20,6 +21,12 @@ public:
     virtual std::shared_ptr<IColumn> createColumn() const = 0;
     virtual std::shared_ptr<IDataType> clone() const = 0;
     virtual void deserializeTextQuoted(IColumn & column, IO::ReadBuffer & istr) const = 0;
+	
+	 virtual void serializeBinaryBulk(const IColumn & column, IO::WriteBuffer & ostr, size_t offset, size_t limit) const = 0;
+	 virtual void serializeBinary(const Field & field, IO::WriteBuffer & ostr) const = 0;
+	 virtual void serializeBinary(const IColumn & column, size_t row_num, IO::WriteBuffer & ostr) const = 0;
+	 
+	 
     virtual ~IDataType() {};
 };
 

@@ -5,8 +5,6 @@
 #include <CommonUtil/SystemUtil.h>
 #include <sys/time.h>
 
-const static std::string time_formatter = "%Y-%m-%d %H:%M:%S";
-
 //将msg中的日志信息按一定格式化后写入text
 void DataBase::OwnPatternFormatter::format(const Poco::Message& msg, std::string& text)
 {
@@ -15,10 +13,7 @@ void DataBase::OwnPatternFormatter::format(const Poco::Message& msg, std::string
     struct timeval tv;
     // 获取秒和纳秒
     if (!gettimeofday(&tv, nullptr)) {
-        Poco::Timestamp time = Poco::Timestamp::fromEpochTime(tv.tv_sec);
-        Poco::LocalDateTime localDateTime(time);
-		//打印时间
-        IO::writeTimestampText(localDateTime, time_formatter, wb);
+		IO::writeDateTimeText(tv.tv_sec,wb);
         IO::writeChar('.', wb);
         // 打印纳秒
         IO::writeChar('0' + ((tv.tv_usec / 100000) % 10), wb);

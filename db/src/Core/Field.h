@@ -6,6 +6,7 @@
 
 namespace ErrorCodes {
 extern const int BAD_TYPE_OF_FIELD;
+extern const int BAD_GET;
 }
 namespace DataBase {
 
@@ -141,6 +142,22 @@ public:
         const TWithoutRef * __attribute__((__may_alias__)) ptr = reinterpret_cast<const TWithoutRef*>(storage);
         return *ptr;
     };
+
+    template <typename T> T & safeGet()
+    {
+        const Types::Which requested = TypeToEnum<typename std::decay<T>::type>::value;
+        if (which != requested)
+            throw Poco::Exception("Bad get: has " + std::string(getTypeName()) + ", requested " + std::string(Types::toString(requested)), ErrorCodes::BAD_GET);
+        return get<T>();
+    }
+
+    template <typename T> const T & safeGet() const
+    {
+        const Types::Which requested = TypeToEnum<typename std::decay<T>::type>::value;
+        if (which != requested)
+            throw Poco::Exception("Bad get: has " + std::string(getTypeName()) + ", requested " + std::string(Types::toString(requested)), ErrorCodes::BAD_GET);
+        return get<T>();
+    }
 
     ~Field()
     {
@@ -295,4 +312,59 @@ T get(const Field & field)
     return field.template get<T>();
 }
 
+template <typename T>
+T safeGet(const Field & field)
+{
+    return field.template safeGet<T>();
+}
+
+template <typename T>
+T safeGet(Field & field)
+{
+    return field.template safeGet<T>();
+}
+
+
+
+template <typename T> struct NearestFieldType;
+
+template <> struct NearestFieldType<UInt8>   {
+    using Type = UInt64;
+};
+template <> struct NearestFieldType<UInt16>  {
+    using Type = UInt64;
+};
+template <> struct NearestFieldType<UInt32>  {
+    using Type = UInt64;
+};
+template <> struct NearestFieldType<UInt64>  {
+    using Type = UInt64;
+};
+template <> struct NearestFieldType<Int8>    {
+    using Type = Int64;
+};
+template <> struct NearestFieldType<Int16>   {
+    using Type = Int64;
+};
+template <> struct NearestFieldType<Int32>   {
+    using Type = Int64;
+};
+template <> struct NearestFieldType<Int64>   {
+    using Type = Int64;
+};
+template <> struct NearestFieldType<Float32> {
+    using Type = Float64;
+};
+template <> struct NearestFieldType<Float64> {
+    using Type = Float64;
+};
+template <> struct NearestFieldType<String>  {
+    using Type = String;
+};
+template <> struct NearestFieldType<bool>    {
+    using Type = UInt64;
+};
+template <> struct NearestFieldType<Null>    {
+    using Type = Null;
+};
 }

@@ -46,6 +46,7 @@ message("project root path is : " ${PROJECT_ROOT_PATH} )
 include(cmake/find_poco.cmake)
 include(cmake/find_cityhash.cmake)
 include(cmake/find_double_conversion.cmake)
+include(cmake/find_cctz.cmake)
 
 #添加子目录
 add_subdirectory(contrib)

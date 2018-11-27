@@ -1,5 +1,6 @@
 #include<Storages/BackgroundProcessingPool.h>
 #include<CommonUtil/LoggerUtil.h>
+#include<Exception/ExceptionHelper.h>
 #include<CommonUtil/SystemUtil.h>
 #include<random>
 Storage::BackgroundProcessingPool::BackgroundProcessingPool(int size_)

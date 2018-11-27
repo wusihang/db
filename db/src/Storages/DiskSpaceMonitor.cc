@@ -1,5 +1,6 @@
 #include<Storages/DiskSpaceMonitor.h>
 #include<CommonUtil/LoggerUtil.h>
+#include<Exception/ExceptionHelper.h>
 
 namespace Storage {
 size_t DiskSpaceMonitor::reserved_bytes;

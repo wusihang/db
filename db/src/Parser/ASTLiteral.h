@@ -7,7 +7,8 @@ public:
     Field value;
     ASTLiteral() = default;
     ASTLiteral(const StringRange range_, const Field & value_);
-
+    std::shared_ptr< IAST > clone() const override;
+    std::string getId() const override;
 protected:
     String getColumnNameImpl() const override;
 };

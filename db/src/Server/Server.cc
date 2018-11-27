@@ -22,6 +22,7 @@
 #include<Poco/Net/DNS.h>
 #include <Poco/Net/NetException.h>
 #include<DataTypes/DataTypeFactory.h>
+#include<Core/DateLUT.h>
 #include<memory>
 #include<chrono>
 #include<string>
@@ -68,6 +69,11 @@ int DataBase::Server::main(const std::vector< std::string >& args)
         }
     }
 
+    /// Initialize DateLUT early, to not interfere with running time of first query.
+    LOG_DEBUG(log, "Initializing DateLUT.");
+    DataBase::DateLUT::instance();
+    LOG_TRACE(log, "Initialized DateLUT with time zone `" << DateLUT::instance().getTimeZone() << "'.");
+    
     //创建临时文件目录
     {
         std::string tmp_path = config().getString("tmp_path", path + "tmp/");

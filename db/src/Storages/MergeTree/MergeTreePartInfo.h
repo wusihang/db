@@ -1,5 +1,5 @@
 #pragma once
-#include<Poco/Types.h>
+#include<Core/DateLUT.h>
 #include<tuple>
 namespace Storage {
 struct MergeTreePartInfo
@@ -22,5 +22,7 @@ struct MergeTreePartInfo
                && max_block >= rhs.max_block
                && level >= rhs.level;
     }
+    
+    static std::string getPartName(DataBase::DayNum_t left_date, DataBase::DayNum_t right_date, DataBase::Int64 left_id, DataBase::Int64 right_id, DataBase::UInt64 level);
 };
 }

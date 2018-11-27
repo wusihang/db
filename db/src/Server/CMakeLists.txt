@@ -9,6 +9,7 @@ list(APPEND SERVER_SOURCES NotFoundHandler.cc)
 add_executable(db main.cc ${SERVER_SOURCES})
 #可执行文件的生成需要链接以下库
 list(APPEND FNIAL_TARGET_DEP_LIBS ${Poco_Util_LIBRARY})
+list(APPEND FNIAL_TARGET_DEP_LIBS ExceptionLib)
 list(APPEND FNIAL_TARGET_DEP_LIBS CommonUtil)
 list(APPEND FNIAL_TARGET_DEP_LIBS DaemonLib)
 list(APPEND FNIAL_TARGET_DEP_LIBS AggregationFunctionLib)

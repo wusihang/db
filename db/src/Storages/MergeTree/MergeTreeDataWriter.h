@@ -43,7 +43,7 @@ public:
     /** All rows must correspond to same partition.
       * Returns part with unique name starting with 'tmp_', yet not added to MergeTreeData.
       */
-    MergeTreeData::MutableDataPartPtr writeTempPart(BlockWithDateInterval & block);
+    MergeTreeData::MutableDataPartPtr writeTempPart(BlockWithDateInterval & block_with_date);
 
 private:
     MergeTreeData & data;

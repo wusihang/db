@@ -44,4 +44,17 @@ String FieldVisitorToString::operator()(const Null& x) const
     return "NULL";
 }
 
+String FieldVisitorDump::operator() (const Null & x) const { return "NULL"; }
+String FieldVisitorDump::operator() (const UInt64 & x) const { return IO::formatQuotedWithPrefix(x, "UInt64_"); }
+String FieldVisitorDump::operator() (const Int64 & x) const { return IO::formatQuotedWithPrefix(x, "Int64_"); }
+String FieldVisitorDump::operator() (const Float64 & x) const { return IO::formatQuotedWithPrefix(x, "Float64_"); }
+
+
+String FieldVisitorDump::operator() (const String & x) const
+{
+    IO::WriteBufferFromOwnString wb;
+    IO::writeQuoted(x, wb);
+    return wb.str();
+}
+
 }

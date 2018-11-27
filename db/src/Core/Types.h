@@ -158,3 +158,9 @@ template <> struct TypeName<Null>  {
 };
 
 }
+
+
+#ifdef IN_KDEVELOP_PARSER
+    using time_t = DataBase::Int64;
+    using size_t = DataBase::UInt64;
+#endif

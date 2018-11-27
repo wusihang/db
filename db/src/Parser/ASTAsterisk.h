@@ -9,5 +9,13 @@ public:
     std::string getColumnName() const override {
         return "*";
     }
+    
+    std::string getId() const override{
+		return "Asterisk";
+	}
+	
+    std::shared_ptr< IAST > clone() const override{
+		return std::make_shared<ASTAsterisk>(*this); 
+    }
 };
 }

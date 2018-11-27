@@ -8,11 +8,11 @@
 #include<deque>
 #include<iostream>
 #include<DataBases/IDataBase.h>
-#include<CommonUtil/LoggerUtil.h>
 #include<CommonUtil/SystemUtil.h>
 #include<Storages/BackgroundProcessingPool.h>
 #include<IO/ReadBuffer.h>
 #include<Streams/FormatFactory.h>
+#include<Exception/ExceptionHelper.h>
 namespace ErrorCodes
 {
 extern const int THERE_IS_NO_SESSION;
@@ -359,6 +359,19 @@ void DataBase::Context::setTemporaryPath(const std::string& path)
 {
     auto lock = getLock();
     shared->tmp_path = path;
+}
+
+
+DataBase::Settings DataBase::Context::getSettings() const
+{
+	auto lock = getLock();
+	return settings;
+}
+
+void DataBase::Context::setSettings(const DataBase::Settings& settings_)
+{
+    auto lock= getLock();
+	settings = settings_;
 }
 
 

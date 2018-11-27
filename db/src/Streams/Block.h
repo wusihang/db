@@ -2,6 +2,7 @@
 #include<vector>
 #include<map>
 #include<Core/ColumnWithTypeAndName.h>
+#include<Core/NamesAndTypes.h>
 
 namespace IO {
 
@@ -27,6 +28,9 @@ public:
     const  DataBase::ColumnWithTypeAndName & getByPosition(size_t position) const {
         return data[position];
     }
+    
+    DataBase::ColumnWithTypeAndName & safeGetByPosition(size_t position);
+    const DataBase::ColumnWithTypeAndName & safeGetByPosition(size_t position) const;
 
     size_t columns() const {
         return data.size();
@@ -41,6 +45,14 @@ public:
     void insert(size_t position, const DataBase::ColumnWithTypeAndName & elem);
     void insert(const DataBase::ColumnWithTypeAndName & elem);
     void insert(const DataBase::ColumnWithTypeAndName && elem);
+
+    DataBase::ColumnWithTypeAndName & getByName(const std::string & name);
+    const  DataBase::ColumnWithTypeAndName & getByName(const std::string & name) const;
+	
+	/** Get a list of column names separated by commas. */
+    std::string dumpNames() const;
+	
+	DataBase::NamesAndTypesList getColumnsList() const;
 };
 
 }

@@ -10,3 +10,14 @@ DataBase::String DataBase::ASTLiteral::getColumnNameImpl() const
 {
     return applyVisitor(FieldVisitorToString(),value);
 }
+
+
+std::shared_ptr< DataBase::IAST > DataBase::ASTLiteral::clone() const
+{
+    return std::make_shared<ASTLiteral>(*this);
+}
+
+std::string DataBase::ASTLiteral::getId() const
+{
+    return "Literal_" + applyVisitor(FieldVisitorDump(), value);
+}

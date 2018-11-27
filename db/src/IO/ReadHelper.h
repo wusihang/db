@@ -7,6 +7,13 @@
 #include<IO/ReadBuffer.h>
 #include<CommonUtil/StringUtils.h>
 #include<Ext/likely.h>
+#include<Core/DateLUT.h>
+#define DEFAULT_MAX_STRING_SIZE 0x00FFFFFFULL
+#include<IO/VarInt.h>
+
+namespace ErrorCodes {
+extern const int CANNOT_PARSE_DATE;
+}
 
 namespace IO {
 template <typename T, typename ReturnType = void>
@@ -173,9 +180,9 @@ void readIntTextUnsafe(T & x, ReadBuffer & buf)
     auto on_error = []
     {
         if (throw_on_error)
-		{
-			throw Poco::Exception("try read eof");
-		}
+        {
+            throw Poco::Exception("try read eof");
+        }
     };
 
     if (unlikely(buf.eof()))
@@ -242,5 +249,42 @@ inline void skipWhitespaceIfAny(ReadBuffer & buf)
 }
 
 void assertChar(char symbol, ReadBuffer & buf);
+
+
+/// In YYYY-MM-DD format
+inline void readDateText(DataBase::DayNum_t & date, ReadBuffer & buf)
+{
+    char s[10];
+    size_t size = buf.read(s, 10);
+    if (10 != size)
+    {
+        s[size] = 0;
+        throw Poco::Exception(std::string("Cannot parse date ") + s, ErrorCodes::CANNOT_PARSE_DATE);
+    }
+
+    Poco::UInt16 year = (s[0] - '0') * 1000 + (s[1] - '0') * 100 + (s[2] - '0') * 10 + (s[3] - '0');
+    Poco::UInt8 month = (s[5] - '0') * 10 + (s[6] - '0');
+    Poco::UInt8 day = (s[8] - '0') * 10 + (s[9] - '0');
+
+    date = DataBase::DateLUT::instance().makeDayNum(year, month, day);
+}
+
+inline void readStringBinary(std::string & s, ReadBuffer & buf, size_t MAX_STRING_SIZE = DEFAULT_MAX_STRING_SIZE)
+{
+    size_t size = 0;
+    IO::readVarUInt(size, buf);
+
+    if (size > MAX_STRING_SIZE)
+        throw Poco::Exception("Too large string size.");
+
+    s.resize(size);
+    buf.readStrict(&s[0], size);
+}
+
+template <typename T>
+inline typename std::enable_if<std::is_arithmetic<T>::value, void>::type
+readBinary(T & x, ReadBuffer & buf) { readPODBinary(x, buf); }
+
+inline void readBinary(std::string & x, ReadBuffer & buf) { readStringBinary(x, buf); }
 
 }

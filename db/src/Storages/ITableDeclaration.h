@@ -7,6 +7,7 @@ class ITableDeclaration {
 public:
     IO::Block getSampleBlock() const;
 	const DataBase::NamesAndTypesList & getColumnsListNonMaterialized() const { return getColumnsListImpl(); }
+	DataBase::NamesAndTypesList getColumnsList() const;
 private:
     const DataBase::NamesAndTypesList getColumnsListRange() const;
     virtual const DataBase::NamesAndTypesList & getColumnsListImpl() const = 0;

@@ -6,6 +6,7 @@
 #include<Storages/DiskSpaceMonitor.h>
 #include<Storages/MergeTree//MergeTreeBlockOutputStream.h>
 #include <experimental/optional>
+#include<Parser/IAST.h>
 namespace ErrorCodes
 {
 extern const int ABORTED;
@@ -16,9 +17,11 @@ extern const int LOGICAL_ERROR;
 namespace Storage {
 MergeTreeStorage::MergeTreeStorage(DataBase::Context& _context,const std::string & path_,
                                    const std::string & database_name_,
-                                   const std::string & table_name_,DataBase::NamesAndTypesListPtr columns_)
-    :pool(_context.getBackgroundPool()),context(_context),path(path_),database_name(database_name_),table_name(table_name_)
-    ,log(&Logger::get(database_name_+"."+table_name_+"(StorageMergeTree)")),data(database_name,table_name,path,database_name_ + "." + table_name_,columns_),merger(data,context.getBackgroundPool()),writer(data) {
+                                   const std::string & table_name_,DataBase::NamesAndTypesListPtr columns_,const std::string& date_column_name_,std::shared_ptr<DataBase::IAST> & primary_expr_ast_,DataBase::UInt64 index_granularity)
+    :pool(_context.getBackgroundPool()),context(_context),path(path_),full_path(path_+table_name_+"/"),database_name(database_name_),table_name(table_name_)
+    ,log(&Logger::get(database_name_+"."+table_name_+"(StorageMergeTree)")),
+    data(database_name,table_name,full_path,database_name_ + "." + table_name_,columns_,date_column_name_,primary_expr_ast_,index_granularity,_context)
+	,merger(data,context.getBackgroundPool()),writer(data) {
 
 }
 void MergeTreeStorage::startup()

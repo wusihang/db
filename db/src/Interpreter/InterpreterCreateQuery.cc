@@ -132,7 +132,7 @@ IO::BlockIO InterpreterCreateQuery::createTable(ASTCreateQuery& create)
         }
         std::shared_ptr< DataBase::IDataBase > database = context.getDatabase(database_name);
         ASTFunction& engine = typeid_cast<ASTFunction&>( *create.storage);
-        storage = StorageFactory::getStorage(engine.name,path,table_name,database_name,context,columns.columns);
+        storage = StorageFactory::getStorage(engine.name,path,table_name,database_name,context,columns.columns,query_ptr);
         database->createTable(table_name,storage,query_ptr);
     }
     storage->startup();

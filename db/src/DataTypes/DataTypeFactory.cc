@@ -91,11 +91,13 @@ void DataTypeFactory::registerSimpleDataType(const std::string& name, SimpleCrea
 
 
 void registerDataTypeNumbers(DataTypeFactory & factory);
+void registerDataTypeDate(DataTypeFactory & factory);
 
 void DataTypeFactory::registerDataTypes()
 {
 		DataTypeFactory& instance =  DataTypeFactory::instance();
 		registerDataTypeNumbers(instance);
+		registerDataTypeDate(instance);
 }
 
 }

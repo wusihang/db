@@ -1,7 +1,6 @@
 #include<Interpreter/ExecuteQuery.h>
 #include<Parser/ParseQuery.h>
 #include<Parser/ParseUtil.h>
-#include<CommonUtil/LoggerUtil.h>
 #include<Interpreter/InterpreterFactory.h>
 #include<Interpreter/Context.h>
 #include<Interpreter/Context.h>
@@ -21,7 +20,6 @@ static std::tuple< std::shared_ptr<DataBase::IAST>, IO::BlockIO> executeQueryImp
             throw Poco::Exception("Unexpected behavior: AST chars range is not inside source range");
         }
     } catch(...) {
-        DataBase::currentExceptionLog();
         throw;
     }
     auto interpreter  = DataBase::InterpreterFactory::get(ast,context);
@@ -54,7 +52,6 @@ void DataBase::executeQuery(IO::ReadBuffer& ibuf, IO::WriteBuffer& wbuf,DataBase
             CopyStreamDataUtil::copyData(in, *streams.out);
         }
     } catch(...) {
-        DataBase::currentExceptionLog();
         throw;
     }
 }

@@ -41,4 +41,15 @@ public:
     String operator() (const String & x) const;
 };
 
+/** Print readable and unique text dump of field type and value. */
+class FieldVisitorDump : public StaticVisitor<String>
+{
+public:
+    String operator() (const Null & x) const;
+    String operator() (const UInt64 & x) const;
+    String operator() (const Int64 & x) const;
+    String operator() (const Float64 & x) const;
+    String operator() (const String & x) const;
+};
+
 }

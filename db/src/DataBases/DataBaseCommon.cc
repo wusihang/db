@@ -22,7 +22,7 @@ std::pair< std::string,std::shared_ptr<Storage::IStorage> > createTableFromDefin
     {
         ast_create_query.table,
         StorageFactory::getStorage(
-            storage_name, database_data_path, ast_create_query.table, database_name, context, columns_info.columns)
+            storage_name, database_data_path, ast_create_query.table, database_name, context, columns_info.columns,ast)
     };
 }
 
